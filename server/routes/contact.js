@@ -1,6 +1,7 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { sendContactEmail } from '../utils/email.js';
+import Contact from '../models/Contact.js';
 
 const router = express.Router();
 
@@ -24,14 +25,28 @@ router.post(
 
       const { name, email, subject, message } = req.body;
 
-      await sendContactEmail({
+      // Save to database
+      await Contact.create({
         name,
         email,
         subject,
         message,
       });
 
-      res.json({ message: 'Message sent successfully' });
+      // Try to send email (non-blocking)
+      try {
+        await sendContactEmail({
+          name,
+          email,
+          subject,
+          message,
+        });
+      } catch (emailError) {
+        console.error('Email send error:', emailError);
+        // Continue even if email fails
+      }
+
+      res.json({ message: 'Message sent successfully! We will get back to you soon.' });
     } catch (error) {
       console.error('Contact form error:', error);
       res.status(500).json({ message: 'Failed to send message', error: error.message });

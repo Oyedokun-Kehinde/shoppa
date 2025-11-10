@@ -9,6 +9,7 @@ import productRoutes from './routes/products.js';
 import contactRoutes from './routes/contact.js';
 import wishlistRoutes from './routes/wishlist.js';
 import orderRoutes from './routes/orders.js';
+import newsletterRoutes from './routes/newsletter.js';
 
 // Load env vars
 dotenv.config();
@@ -32,6 +33,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

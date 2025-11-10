@@ -1,7 +1,34 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, Truck, Shield, Headphones } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, Package } from 'lucide-react';
+import HeroCarousel from '../components/HeroCarousel';
+import AnimatedCounter from '../components/AnimatedCounter';
+import toast from 'react-hot-toast';
+import api from '../lib/api';
 
 const Home = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    setSubscribing(true);
+    try {
+      const response = await api.post('/newsletter/subscribe', { email: newsletterEmail });
+      toast.success(response.data.message || 'Successfully subscribed!');
+      setNewsletterEmail('');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to subscribe');
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
   const featuredProducts = [
     {
       id: '1',
@@ -9,6 +36,7 @@ const Home = () => {
       price: 299.99,
       image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
       category: 'Electronics',
+      rating: 4.8,
     },
     {
       id: '2',
@@ -16,6 +44,7 @@ const Home = () => {
       price: 189.99,
       image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500',
       category: 'Fashion',
+      rating: 4.7,
     },
     {
       id: '3',
@@ -23,6 +52,7 @@ const Home = () => {
       price: 399.99,
       image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
       category: 'Electronics',
+      rating: 4.9,
     },
     {
       id: '4',
@@ -30,73 +60,135 @@ const Home = () => {
       price: 129.99,
       image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500',
       category: 'Fashion',
+      rating: 4.6,
     },
   ];
 
   const features = [
     {
-      icon: <Truck className="h-8 w-8" />,
-      title: 'Free Shipping',
-      description: 'On orders over $50',
+      icon: <Truck className="h-10 w-10" />,
+      title: 'Fast & Free Shipping',
+      description: 'Free shipping on all orders over $50 with delivery in 2-3 business days',
+      color: 'bg-blue-50 text-blue-600',
     },
     {
-      icon: <Shield className="h-8 w-8" />,
-      title: 'Secure Payment',
-      description: '100% secure transactions',
+      icon: <Shield className="h-10 w-10" />,
+      title: 'Secure Payments',
+      description: '100% secure transactions with Paystack and industry-leading encryption',
+      color: 'bg-green-50 text-green-600',
     },
     {
-      icon: <Headphones className="h-8 w-8" />,
+      icon: <Headphones className="h-10 w-10" />,
       title: '24/7 Support',
-      description: 'Dedicated customer service',
+      description: 'Dedicated customer service team ready to help you anytime, anywhere',
+      color: 'bg-purple-50 text-purple-600',
     },
     {
-      icon: <ShoppingBag className="h-8 w-8" />,
+      icon: <Package className="h-10 w-10" />,
       title: 'Easy Returns',
-      description: '30-day return policy',
+      description: '30-day hassle-free return policy on all purchases, no questions asked',
+      color: 'bg-orange-50 text-orange-600',
     },
+  ];
+
+  const testimonials = [
+    {
+      name: 'Sarah Johnson',
+      role: 'Fashion Enthusiast',
+      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+      content: 'Shoppa has completely transformed my shopping experience. The quality of products is exceptional, and the customer service is outstanding!',
+      rating: 5,
+    },
+    {
+      name: 'Michael Chen',
+      role: 'Tech Professional',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+      content: 'I love the variety and quality of electronics available. Fast shipping and great prices make this my go-to store for all tech purchases.',
+      rating: 5,
+    },
+    {
+      name: 'Emily Rodriguez',
+      role: 'Home Decorator',
+      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
+      content: 'The home decor collection is stunning! I\'ve furnished my entire apartment with items from Shoppa. Highly recommend to everyone!',
+      rating: 5,
+    },
+  ];
+
+  const stats = [
+    { icon: <ShoppingBag className="h-8 w-8" />, number: 50000, suffix: '+', label: 'Products Sold' },
+    { icon: <Star className="h-8 w-8" />, number: 4.9, suffix: '/5', label: 'Customer Rating', isDecimal: true },
+    { icon: <TrendingUp className="h-8 w-8" />, number: 10000, suffix: '+', label: 'Happy Customers' },
+    { icon: <Award className="h-8 w-8" />, number: 99, suffix: '%', label: 'Satisfaction Rate' },
+  ];
+
+  const categories = [
+    { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=500', count: '200+' },
+    { name: 'Fashion', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=500', count: '300+' },
+    { name: 'Home & Living', image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=500', count: '150+' },
+    { name: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500', count: '100+' },
   ];
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-dark via-dark-light to-dark text-white py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              Discover Premium
-              <span className="text-primary block">Products</span>
-            </h1>
-            <p className="text-xl text-gray-300 mb-8">
-              Experience quality and style with our curated collection of exceptional products.
-            </p>
-            <Link to="/shop" className="btn-primary inline-flex items-center space-x-2">
-              <span>Shop Now</span>
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          </div>
-        </div>
-        <div className="absolute bottom-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent opacity-50"></div>
-      </section>
+      {/* Hero Carousel */}
+      <HeroCarousel />
 
-      {/* Features Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Features Section - Enhanced */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-dark mb-4">Why Shop With Us?</h2>
+            <p className="text-gray-600 text-lg">Experience the difference with our premium service</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary text-white mb-4">
+              <div
+                key={index}
+                className="card p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+              >
+                <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl ${feature.color} mb-6`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="text-xl font-bold mb-3 text-dark">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Categories Section */}
       <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="section-title">Shop by Category</h2>
+            <p className="section-subtitle">Explore our diverse range of premium products</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {categories.map((category, index) => (
+              <Link
+                key={index}
+                to={`/shop?category=${category.name}`}
+                className="group relative overflow-hidden rounded-xl aspect-square"
+              >
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6">
+                  <h3 className="text-white text-2xl font-bold mb-1">{category.name}</h3>
+                  <p className="text-gray-200 text-sm">{category.count} Products</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="section-title">Featured Products</h2>
@@ -110,7 +202,7 @@ const Home = () => {
               <Link
                 key={product.id}
                 to={`/product/${product.id}`}
-                className="card overflow-hidden group"
+                className="card overflow-hidden group hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative h-64 overflow-hidden">
                   <img
@@ -118,39 +210,146 @@ const Home = () => {
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
                     New
                   </div>
                 </div>
                 <div className="p-6">
                   <p className="text-sm text-gray-500 mb-2">{product.category}</p>
-                  <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                  <p className="text-2xl font-bold text-primary">${product.price}</p>
+                  <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+                    {product.name}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <p className="text-2xl font-bold text-primary">${product.price}</p>
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm font-semibold">{product.rating}</span>
+                    </div>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
 
           <div className="text-center mt-12">
-            <Link to="/shop" className="btn-outline">
-              View All Products
+            <Link to="/shop" className="btn-primary inline-flex items-center space-x-2">
+              <span>View All Products</span>
+              <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-primary text-white py-20">
+      {/* Stats Section */}
+      <section className="bg-primary text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 mb-4">
+                  {stat.icon}
+                </div>
+                <div className="text-4xl md:text-5xl font-bold mb-2">
+                  <AnimatedCounter end={stat.number} suffix={stat.suffix} duration={2500} />
+                </div>
+                <div className="text-lg opacity-90">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="section-title">What Our Customers Say</h2>
+            <p className="section-subtitle">
+              Don't just take our word for it - hear from our satisfied customers
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="card p-8 hover:shadow-xl transition-all duration-300 relative"
+              >
+                <Quote className="absolute top-6 right-6 h-12 w-12 text-primary/10" />
+                <div className="flex items-center space-x-4 mb-6">
+                  <img
+                    src={testimonial.image}
+                    alt={testimonial.name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div>
+                    <h4 className="font-bold text-dark">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  </div>
+                </div>
+                <div className="flex space-x-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-gray-700 leading-relaxed">{testimonial.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter CTA */}
+      <section className="bg-gradient-to-r from-dark via-dark-light to-dark text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Join Our Community
+            </h2>
+            <p className="text-xl mb-8 text-gray-300">
+              Subscribe to get exclusive offers, early access to sales, and style tips directly in your inbox
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                disabled={subscribing}
+                className="flex-1 px-6 py-4 rounded-lg text-dark focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+              />
+              <button 
+                type="submit"
+                disabled={subscribing}
+                className="bg-primary hover:bg-primary-dark px-8 py-4 rounded-lg font-semibold transition-colors whitespace-nowrap disabled:opacity-50"
+              >
+                {subscribing ? 'Subscribing...' : 'Subscribe'}
+              </button>
+            </form>
+            <p className="text-sm text-gray-400 mt-4">
+              We respect your privacy. Unsubscribe at any time.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Join Our Community
+          <h2 className="text-4xl md:text-5xl font-bold text-dark mb-6">
+            Ready to Start Shopping?
           </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Sign up today and get exclusive access to special offers, new arrivals, and more.
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Create your account today and get exclusive access to member-only deals and personalized recommendations
           </p>
-          <Link to="/register" className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block">
-            Create Account
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/register" className="btn-primary">
+              Create Account
+            </Link>
+            <Link to="/shop" className="btn-outline">
+              Browse Products
+            </Link>
+          </div>
         </div>
       </section>
     </div>

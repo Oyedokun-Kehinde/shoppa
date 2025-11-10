@@ -1,19 +1,77 @@
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
-import { Package, ShoppingBag, Heart, Settings } from 'lucide-react';
+import { useWishlistStore } from '../../store/wishlistStore';
+import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import api from '../../lib/api';
+import toast from 'react-hot-toast';
 
 const UserDashboard = () => {
   const { user } = useAuthStore();
+  const { items: wishlistItems } = useWishlistStore();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentOrders = [
-    { id: '1', date: '2024-01-15', total: 299.99, status: 'Delivered' },
-    { id: '2', date: '2024-01-10', total: 189.99, status: 'In Transit' },
-    { id: '3', date: '2024-01-05', total: 449.98, status: 'Processing' },
-  ];
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/orders/myorders');
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast.error('Failed to load orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'Delivered':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'Shipped':
+        return <Truck className="h-5 w-5 text-blue-500" />;
+      case 'Processing':
+        return <Clock className="h-5 w-5 text-yellow-500" />;
+      case 'Pending':
+        return <Package className="h-5 w-5 text-gray-500" />;
+      default:
+        return <XCircle className="h-5 w-5 text-red-500" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Delivered':
+        return 'bg-green-100 text-green-800';
+      case 'Shipped':
+        return 'bg-blue-100 text-blue-800';
+      case 'Processing':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Pending':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-red-100 text-red-800';
+    }
+  };
 
   const stats = [
-    { icon: <Package className="h-8 w-8" />, label: 'Total Orders', value: '12' },
-    { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: '2' },
-    { icon: <Heart className="h-8 w-8" />, label: 'Wishlist', value: '8' },
+    { icon: <Package className="h-8 w-8" />, label: 'Total Orders', value: orders.length.toString(), color: 'bg-blue-50 text-blue-600' },
+    { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: orders.filter((o: any) => !o.isDelivered).length.toString(), color: 'bg-green-50 text-green-600' },
+    { icon: <Heart className="h-8 w-8" />, label: 'Wishlist', value: wishlistItems.length.toString(), color: 'bg-pink-50 text-pink-600' },
+    { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `$${orders.reduce((sum: number, o: any) => sum + o.totalPrice, 0).toFixed(2)}`, color: 'bg-purple-50 text-purple-600' },
+  ];
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: <User className="h-5 w-5" /> },
+    { id: 'orders', label: 'Orders', icon: <Package className="h-5 w-5" /> },
+    { id: 'wishlist', label: 'Wishlist', icon: <Heart className="h-5 w-5" /> },
+    { id: 'profile', label: 'Profile', icon: <Settings className="h-5 w-5" /> },
   ];
 
   return (
@@ -22,19 +80,19 @@ const UserDashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-dark mb-2">Welcome back, {user?.name}!</h1>
-          <p className="text-gray-600">Manage your orders and account settings</p>
+          <p className="text-gray-600">Manage your orders, wishlist, and account settings</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="card p-6">
+            <div key={index} className="card p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 mb-1">{stat.label}</p>
+                  <p className="text-gray-600 mb-1 text-sm">{stat.label}</p>
                   <p className="text-3xl font-bold text-dark">{stat.value}</p>
                 </div>
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <div className={`w-16 h-16 rounded-xl ${stat.color} flex items-center justify-center`}>
                   {stat.icon}
                 </div>
               </div>
@@ -42,66 +100,262 @@ const UserDashboard = () => {
           ))}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Recent Orders */}
-          <div className="md:col-span-2">
-            <div className="card p-6">
-              <h2 className="text-2xl font-bold mb-6">Recent Orders</h2>
-              <div className="space-y-4">
-                {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-semibold">Order #{order.id}</p>
-                      <p className="text-sm text-gray-600">{order.date}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-primary">${order.total}</p>
-                      <span className={`text-sm px-3 py-1 rounded-full ${
-                        order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                        order.status === 'In Transit' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button className="btn-outline w-full mt-6">
-                View All Orders
-              </button>
-            </div>
+        {/* Tabs */}
+        <div className="card mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-6" aria-label="Tabs">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-semibold text-sm transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
 
-          {/* Account Menu */}
-          <div className="space-y-6">
-            <div className="card p-6">
-              <h2 className="text-2xl font-bold mb-6">Account</h2>
-              <div className="space-y-3">
-                <button className="w-full text-left flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Settings className="h-5 w-5 text-primary" />
-                  <span>Settings</span>
-                </button>
-                <button className="w-full text-left flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Heart className="h-5 w-5 text-primary" />
-                  <span>Wishlist</span>
-                </button>
-                <button className="w-full text-left flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Package className="h-5 w-5 text-primary" />
-                  <span>Orders</span>
-                </button>
-              </div>
-            </div>
+          <div className="p-6">
+            {/* Overview Tab */}
+            {activeTab === 'overview' && (
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
+                  {loading ? (
+                    <div className="text-center py-12">
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+                    </div>
+                  ) : orders.length > 0 ? (
+                    <div className="space-y-4">
+                      {orders.slice(0, 3).map((order: any) => (
+                        <div key={order._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center space-x-4">
+                            {getStatusIcon(order.status)}
+                            <div>
+                              <p className="font-semibold">Order #{order._id.slice(-8)}</p>
+                              <p className="text-sm text-gray-600">
+                                {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-primary">${order.totalPrice.toFixed(2)}</p>
+                            <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(order.status)}`}>
+                              {order.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 mb-4">No orders yet</p>
+                      <Link to="/shop" className="btn-primary">
+                        Start Shopping
+                      </Link>
+                    </div>
+                  )}
+                  {orders.length > 3 && (
+                    <button onClick={() => setActiveTab('orders')} className="btn-outline w-full mt-4">
+                      View All Orders
+                    </button>
+                  )}
+                </div>
 
-            <div className="card p-6 bg-primary text-white">
-              <h3 className="text-xl font-bold mb-2">Premium Member</h3>
-              <p className="text-sm opacity-90 mb-4">
-                Enjoy exclusive benefits and early access to sales
-              </p>
-              <button className="bg-white text-primary px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Learn More
-              </button>
-            </div>
+                {wishlistItems.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold mb-6">Your Wishlist</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {wishlistItems.slice(0, 4).map((item: any) => (
+                        <Link
+                          key={item._id}
+                          to={`/product/${item.product._id}`}
+                          className="card overflow-hidden hover:shadow-lg transition-shadow"
+                        >
+                          <img
+                            src={item.product.image}
+                            alt={item.product.name}
+                            className="w-full h-32 object-cover"
+                          />
+                          <div className="p-3">
+                            <h3 className="font-semibold text-sm line-clamp-1">{item.product.name}</h3>
+                            <p className="text-primary font-bold">${item.product.price}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    {wishlistItems.length > 4 && (
+                      <button onClick={() => setActiveTab('wishlist')} className="btn-outline w-full mt-4">
+                        View All Items
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Orders Tab */}
+            {activeTab === 'orders' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">All Orders</h2>
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+                  </div>
+                ) : orders.length > 0 ? (
+                  <div className="space-y-6">
+                    {orders.map((order: any) => (
+                      <div key={order._id} className="card p-6">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                          <div>
+                            <h3 className="font-bold text-lg mb-1">Order #{order._id.slice(-8)}</h3>
+                            <p className="text-sm text-gray-600">
+                              Placed on {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                            <span className={`text-sm px-4 py-2 rounded-full font-semibold ${getStatusColor(order.status)}`}>
+                              {order.status}
+                            </span>
+                            <span className={`text-sm px-4 py-2 rounded-full font-semibold ${
+                              order.isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {order.isPaid ? 'Paid' : 'Unpaid'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-4">
+                          <div className="space-y-3 mb-4">
+                            {order.orderItems.map((item: any, idx: number) => (
+                              <div key={idx} className="flex items-center space-x-4">
+                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                                <div className="flex-1">
+                                  <p className="font-semibold">{item.name}</p>
+                                  <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                                </div>
+                                <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                            <div className="flex items-center space-x-2 text-gray-600">
+                              <MapPin className="h-4 w-4" />
+                              <span className="text-sm">{order.shippingAddress.city}, {order.shippingAddress.country}</span>
+                            </div>
+                            <p className="text-2xl font-bold text-primary">${order.totalPrice.toFixed(2)}</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex space-x-3">
+                          <Link to={`/orders/${order._id}`} className="btn-outline flex-1 text-center">
+                            View Details
+                          </Link>
+                          {!order.isPaid && (
+                            <button className="btn-primary flex-1">
+                              Pay Now
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-4">No orders yet</p>
+                    <Link to="/shop" className="btn-primary">
+                      Start Shopping
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Wishlist Tab */}
+            {activeTab === 'wishlist' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Your Wishlist ({wishlistItems.length})</h2>
+                {wishlistItems.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {wishlistItems.map((item: any) => (
+                      <Link
+                        key={item._id}
+                        to={`/product/${item.product._id}`}
+                        className="card overflow-hidden hover:shadow-lg transition-shadow"
+                      >
+                        <img
+                          src={item.product.image}
+                          alt={item.product.name}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="p-4">
+                          <p className="text-sm text-gray-500 mb-1">{item.product.category}</p>
+                          <h3 className="font-semibold mb-2">{item.product.name}</h3>
+                          <p className="text-2xl font-bold text-primary">${item.product.price}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-4">Your wishlist is empty</p>
+                    <Link to="/shop" className="btn-primary">
+                      Browse Products
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Profile Tab */}
+            {activeTab === 'profile' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
+                <div className="max-w-2xl">
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">Full Name</label>
+                      <input
+                        type="text"
+                        defaultValue={user?.name}
+                        className="input-field"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">Email Address</label>
+                      <input
+                        type="email"
+                        defaultValue={user?.email}
+                        className="input-field"
+                        disabled
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">Password</label>
+                      <button className="btn-outline">
+                        Change Password
+                      </button>
+                    </div>
+                    <div className="pt-4">
+                      <button className="btn-primary">
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

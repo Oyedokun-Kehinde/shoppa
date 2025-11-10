@@ -56,10 +56,26 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Customer Service</h4>
             <ul className="space-y-2">
-              <li className="text-gray-400">Returns & Exchanges</li>
-              <li className="text-gray-400">Shipping Information</li>
-              <li className="text-gray-400">Privacy Policy</li>
-              <li className="text-gray-400">Terms & Conditions</li>
+              <li>
+                <Link to="/refund-policy" className="text-gray-400 hover:text-primary transition-colors">
+                  Returns & Exchanges
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping-policy" className="text-gray-400 hover:text-primary transition-colors">
+                  Shipping Information
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="text-gray-400 hover:text-primary transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms-conditions" className="text-gray-400 hover:text-primary transition-colors">
+                  Terms & Conditions
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -16,12 +16,6 @@ import Contact from './pages/Contact';
 import FAQs from './pages/FAQs';
 import Cart from './pages/Cart';
 
-// Policy Pages
-import PrivacyPolicy from './pages/policies/PrivacyPolicy';
-import TermsConditions from './pages/policies/TermsConditions';
-import RefundPolicy from './pages/policies/RefundPolicy';
-import ShippingPolicy from './pages/policies/ShippingPolicy';
-
 // Auth
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -65,12 +59,6 @@ function App() {
             <Route path="/faqs" element={<FAQs />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            
-            {/* Policy Pages */}
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-conditions" element={<TermsConditions />} />
-            <Route path="/refund-policy" element={<RefundPolicy />} />
-            <Route path="/shipping-policy" element={<ShippingPolicy />} />
             
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
