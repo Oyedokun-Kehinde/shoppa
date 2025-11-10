@@ -111,16 +111,14 @@ const About = () => {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-            backgroundSize: '30px 30px'
+            backgroundSize: '50px 50px'
           }}></div>
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">About Shoppa</h1>
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto animate-fade-in-delay">
-              Your trusted partner in premium e-commerce, delivering excellence since 2020
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">About Shoppa</h1>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto animate-fade-in-delay">
+            We're on a mission to revolutionize online shopping by providing premium products with exceptional service
+          </p>
         </div>
       </section>
 
