@@ -13,8 +13,30 @@ const AnnouncementModal = () => {
 
     // Show modal if not dismissed or if 7 days have passed
     if (!dismissed || daysSinceDismissed > 7) {
-      const timer = setTimeout(() => setIsOpen(true), 2000);
-      return () => clearTimeout(timer);
+      let exitIntentShown = false;
+
+      const handleMouseLeave = (e: MouseEvent) => {
+        // Detect when mouse leaves from top of viewport (exit intent)
+        if (e.clientY <= 0 && !exitIntentShown) {
+          exitIntentShown = true;
+          setIsOpen(true);
+        }
+      };
+
+      // Add event listener for exit intent
+      document.addEventListener('mouseleave', handleMouseLeave);
+
+      // Fallback: show after 30 seconds if user doesn't leave
+      const fallbackTimer = setTimeout(() => {
+        if (!exitIntentShown) {
+          setIsOpen(true);
+        }
+      }, 30000);
+
+      return () => {
+        document.removeEventListener('mouseleave', handleMouseLeave);
+        clearTimeout(fallbackTimer);
+      };
     }
   }, []);
 

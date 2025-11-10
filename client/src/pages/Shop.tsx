@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, X, Heart, ShoppingCart, Star } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
+import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
 
 const Shop = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +19,7 @@ const Shop = () => {
 
   const { addItem } = useCartStore();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
+  const { isAuthenticated } = useAuthStore();
 
   const categories = ['All', 'Electronics', 'Fashion', 'Home & Living', 'Sports', 'Books'];
 
@@ -61,11 +64,21 @@ const Shop = () => {
     });
 
   const handleAddToCart = (product: any) => {
+    if (!isAuthenticated) {
+      toast.error('Please login to add items to cart');
+      navigate('/login', { state: { from: '/shop' } });
+      return;
+    }
     addItem(product);
     toast.success('Added to cart!');
   };
 
   const toggleWishlist = (product: any) => {
+    if (!isAuthenticated) {
+      toast.error('Please login to add items to wishlist');
+      navigate('/login', { state: { from: '/shop' } });
+      return;
+    }
     if (isInWishlist(product._id)) {
       removeFromWishlist(product._id);
       toast.success('Removed from wishlist');

@@ -89,22 +89,94 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className="block py-3 text-dark hover:text-primary transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* Off-Canvas Mobile Menu */}
+      {isMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-[60] md:hidden animate-fade-in"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          
+          {/* Sidebar */}
+          <div className="fixed top-0 right-0 bottom-0 w-80 bg-white shadow-2xl z-[70] md:hidden transform transition-transform duration-300 ease-in-out">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b">
+                <span className="text-2xl font-bold text-primary">Menu</span>
+                <button 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-2">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      className="block py-3 px-4 text-dark hover:bg-gray-50 hover:text-primary rounded-lg transition-all font-medium"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* User Section in Mobile */}
+                <div className="mt-8 pt-6 border-t">
+                  {isAuthenticated ? (
+                    <div className="space-y-2">
+                      <div className="px-4 py-2 text-sm text-gray-600">
+                        Signed in as <span className="font-semibold text-dark">{user?.name}</span>
+                      </div>
+                      <Link
+                        to={user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'}
+                        className="block py-3 px-4 text-dark hover:bg-gray-50 hover:text-primary rounded-lg transition-all font-medium"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full text-left py-3 px-4 text-dark hover:bg-gray-50 hover:text-primary rounded-lg transition-all font-medium"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Link
+                        to="/login"
+                        className="block btn-primary text-center"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/register"
+                        className="block btn-outline text-center"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Register
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </nav>
+            </div>
+          </div>
+        </>
+      )}
     </nav>
   );
 };

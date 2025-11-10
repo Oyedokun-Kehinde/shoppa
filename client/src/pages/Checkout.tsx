@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useCartStore } from '../store/cartStore';
@@ -16,9 +16,17 @@ declare global {
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, clearCart, getTotalPrice } = useCartStore();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [processing, setProcessing] = useState(false);
+
+  // Require authentication
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error('Please login to continue checkout');
+      navigate('/login', { state: { from: '/checkout' } });
+    }
+  }, [isAuthenticated, navigate]);
 
   const total = getTotalPrice();
   const shippingPrice = total > 50 ? 0 : 10;
