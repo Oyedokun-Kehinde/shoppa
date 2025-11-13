@@ -53,7 +53,7 @@ router.post('/', protect, async (req, res) => {
       );
     }
 
-    res.status(201).json({ id: orderId, message: 'Order created' });
+    res.status(201).json({ _id: orderId, id: orderId, message: 'Order created' });
   } catch (error) {
     console.error('Create order error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -77,7 +77,90 @@ router.get('/myorders', protect, async (req, res) => {
   }
 });
 
-// Additional order routes (Payment, Admin) will be implemented later
-// For now, basic create and list orders work
+// @route   POST /api/orders/paystack/initialize
+// @desc    Initialize Paystack payment
+// @access  Private
+router.post('/paystack/initialize', protect, async (req, res) => {
+  try {
+    const { orderId, email, amount } = req.body;
+    
+    // Initialize Paystack payment
+    const response = await axios.post(
+      'https://api.paystack.co/transaction/initialize',
+      {
+        email,
+        amount: Math.round(amount * 100), // Convert to kobo
+        callback_url: `${process.env.CLIENT_URL}/orders/${orderId}`,
+        metadata: {
+          orderId,
+          userId: req.user.id
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    res.json({
+      authorization_url: response.data.data.authorization_url,
+      access_code: response.data.data.access_code,
+      reference: response.data.data.reference
+    });
+  } catch (error) {
+    console.error('Paystack initialize error:', error.response?.data || error.message);
+    res.status(500).json({ 
+      message: 'Payment initialization failed', 
+      error: error.response?.data?.message || error.message 
+    });
+  }
+});
+
+// @route   POST /api/orders/paystack/verify
+// @desc    Verify Paystack payment
+// @access  Private
+router.post('/paystack/verify', protect, async (req, res) => {
+  try {
+    const { reference } = req.body;
+    
+    // Verify payment with Paystack
+    const response = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+        }
+      }
+    );
+
+    const { data } = response.data;
+    
+    if (data.status === 'success') {
+      const pool = getPool();
+      const orderId = data.metadata.orderId;
+      
+      // Update order as paid
+      await pool.query(
+        `UPDATE orders SET is_paid = 1, paid_at = NOW(), payment_result = ? WHERE id = ?`,
+        [JSON.stringify(data), orderId]
+      );
+
+      res.json({ 
+        message: 'Payment verified successfully',
+        order: orderId
+      });
+    } else {
+      res.status(400).json({ message: 'Payment verification failed' });
+    }
+  } catch (error) {
+    console.error('Paystack verify error:', error.response?.data || error.message);
+    res.status(500).json({ 
+      message: 'Payment verification failed', 
+      error: error.response?.data?.message || error.message 
+    });
+  }
+});
 
 module.exports = router;

@@ -1,78 +1,83 @@
-import { Search, ShoppingCart, CreditCard, Truck, CheckCircle, Package, UserCheck, Shield } from 'lucide-react';
+import { Search, ShoppingCart, CreditCard, Truck, CheckCircle, Package, UserCheck, Shield, Clock, Award, ArrowRight } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import { Link } from 'react-router-dom';
 
 const HowItWorks = () => {
   const steps = [
     {
-      icon: <Search className="h-12 w-12" />,
+      number: '01',
+      icon: <Search className="h-16 w-16" />,
       title: 'Browse & Discover',
-      description: 'Explore our wide range of premium products across multiple categories. Use filters and search to find exactly what you need.',
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      description: 'Explore thousands of premium products across multiple categories. Use our advanced filters and smart search to find exactly what you need in seconds.',
+      gradient: 'from-blue-600 via-blue-500 to-cyan-400',
+      image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&h=400&fit=crop',
     },
     {
-      icon: <ShoppingCart className="h-12 w-12" />,
+      number: '02',
+      icon: <ShoppingCart className="h-16 w-16" />,
       title: 'Add to Cart',
-      description: 'Select your desired products and add them to your cart. You can review, edit quantities, or remove items anytime.',
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600',
+      description: 'Select your desired products with confidence. Review items, adjust quantities, save favorites to your wishlist, and manage your cart with ease.',
+      gradient: 'from-green-600 via-green-500 to-emerald-400',
+      image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&h=400&fit=crop',
     },
     {
-      icon: <UserCheck className="h-12 w-12" />,
-      title: 'Login or Register',
-      description: 'Create a free account or log in to proceed with your purchase. Your information is securely stored for future orders.',
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
+      number: '03',
+      icon: <UserCheck className="h-16 w-16" />,
+      title: 'Quick Registration',
+      description: 'Create your free account in under 60 seconds. Your profile is securely stored with encrypted data for seamless future orders.',
+      gradient: 'from-purple-600 via-purple-500 to-pink-400',
+      image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=400&fit=crop',
     },
     {
-      icon: <CreditCard className="h-12 w-12" />,
+      number: '04',
+      icon: <CreditCard className="h-16 w-16" />,
       title: 'Secure Checkout',
-      description: 'Enter your delivery details and select your preferred payment method. All transactions are secured with industry-standard encryption.',
-      color: 'from-yellow-500 to-yellow-600',
-      bgColor: 'bg-yellow-50',
-      iconColor: 'text-yellow-600',
+      description: 'Enter delivery details and choose from multiple payment options. All transactions protected with 256-bit SSL encryption and PCI-DSS compliance.',
+      gradient: 'from-yellow-600 via-yellow-500 to-orange-400',
+      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
     },
     {
-      icon: <Package className="h-12 w-12" />,
-      title: 'Order Processing',
-      description: 'Once payment is confirmed, we immediately process your order. You\'ll receive a confirmation email with your order details.',
-      color: 'from-red-500 to-red-600',
-      bgColor: 'bg-red-50',
-      iconColor: 'text-red-600',
+      number: '05',
+      icon: <Package className="h-16 w-16" />,
+      title: 'Order Confirmed',
+      description: 'Receive instant email confirmation with order tracking details. Watch real-time updates as your package moves through our fulfillment centers.',
+      gradient: 'from-red-600 via-red-500 to-pink-400',
+      image: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=600&h=400&fit=crop',
     },
     {
-      icon: <Truck className="h-12 w-12" />,
+      number: '06',
+      icon: <Truck className="h-16 w-16" />,
       title: 'Fast Delivery',
-      description: 'Track your order in real-time as it makes its way to you. Delivery typically takes 2-5 business days within Nigeria.',
-      color: 'from-indigo-500 to-indigo-600',
-      bgColor: 'bg-indigo-50',
-      iconColor: 'text-indigo-600',
+      description: 'Track your package in real-time with GPS-enabled delivery. Receive SMS updates and enjoy delivery within 2-5 business days across Nigeria.',
+      gradient: 'from-indigo-600 via-indigo-500 to-purple-400',
+      image: 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?w=600&h=400&fit=crop',
     },
   ];
 
   const features = [
     {
-      icon: <Shield className="h-10 w-10" />,
-      title: 'Secure Shopping',
-      description: 'Your data and transactions are protected with bank-level encryption.',
+      icon: <Shield className="h-12 w-12" />,
+      title: 'Bank-Level Security',
+      description: '256-bit SSL encryption protects your data and transactions',
+      stat: '100% Secure',
     },
     {
-      icon: <CheckCircle className="h-10 w-10" />,
-      title: 'Quality Guaranteed',
-      description: 'All products are verified for authenticity and quality before shipping.',
+      icon: <CheckCircle className="h-12 w-12" />,
+      title: 'Quality Guarantee',
+      description: 'Every product verified for authenticity before shipping',
+      stat: '99% Satisfaction',
     },
     {
-      icon: <Truck className="h-10 w-10" />,
-      title: 'Fast Shipping',
-      description: 'Quick and reliable delivery across Nigeria with real-time tracking.',
+      icon: <Clock className="h-12 w-12" />,
+      title: '24/7 Support',
+      description: 'Expert customer service team ready to assist you anytime',
+      stat: 'Always Available',
     },
     {
-      icon: <CreditCard className="h-10 w-10" />,
-      title: 'Flexible Payment',
-      description: 'Multiple payment options including cards, bank transfer, and pay on delivery.',
+      icon: <Award className="h-12 w-12" />,
+      title: 'Best Prices',
+      description: 'Competitive pricing with regular deals and discounts',
+      stat: 'Save More',
     },
   ];
 
@@ -86,76 +91,73 @@ const HowItWorks = () => {
         bgImage="https://images.unsplash.com/photo-1556742400-b5b7f1634129?w=1200"
       />
 
-      {/* Introduction */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6">
-            Shopping Made Simple
-          </h2>
-          <p className="text-xl text-gray-600 leading-relaxed">
-            At Shoppa, we've designed our platform to make online shopping as easy and enjoyable as possible. 
-            Follow these simple steps to get your favorite products delivered right to your doorstep in Akure, 
-            Ondo State, and across Nigeria.
-          </p>
-        </div>
-      </section>
+      {/* Timeline Process Section */}
+      <section className="py-20 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 opacity-50"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-dark mb-6">
+              Your Shopping Journey
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              From browsing to delivery, we've streamlined every step to give you a seamless experience
+            </p>
+          </div>
 
-      {/* Steps Section */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-12">
+          {/* Steps Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {steps.map((step, index) => (
               <div
                 key={index}
-                className={`flex flex-col md:flex-row items-center gap-8 ${
-                  index % 2 === 0 ? '' : 'md:flex-row-reverse'
-                }`}
+                className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
               >
-                {/* Step Number and Icon */}
-                <div className="flex-shrink-0">
-                  <div className={`relative ${step.bgColor} rounded-2xl p-8 shadow-lg`}>
-                    <div className="absolute -top-4 -left-4 bg-dark text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold shadow-xl">
-                      {index + 1}
-                    </div>
-                    <div className={step.iconColor}>
-                      {step.icon}
-                    </div>
+                {/* Gradient Header */}
+                <div className={`h-2 bg-gradient-to-r ${step.gradient}`}></div>
+                
+                {/* Step Number Badge */}
+                <div className="absolute top-6 right-6 z-10">
+                  <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${step.gradient} flex items-center justify-center shadow-xl`}>
+                    <span className="text-white font-bold text-xl">{step.number}</span>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1">
-                  <div className="card p-8 hover:shadow-2xl transition-shadow">
-                    <h3 className="text-2xl md:text-3xl font-bold text-dark mb-4">
-                      {step.title}
-                    </h3>
-                    <p className="text-lg text-gray-600 leading-relaxed">
-                      {step.description}
-                    </p>
+                <div className="p-8">
+                  <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500`}>
+                    <div className="text-white">{step.icon}</div>
                   </div>
-                </div>
 
-                {/* Connecting Line (except last item) */}
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-                    <div className="w-1 h-20 bg-gradient-to-b from-primary/30 to-transparent"></div>
-                  </div>
-                )}
+                  <h3 className="text-2xl font-bold text-dark mb-4 group-hover:text-primary transition-colors">
+                    {step.title}
+                  </h3>
+                  
+                  <p className="text-gray-600 leading-relaxed mb-6">
+                    {step.description}
+                  </p>
+
+                  {/* Connector Arrow */}
+                  {index < steps.length - 1 && (
+                    <div className="hidden lg:block absolute -right-4 top-1/2 transform -translate-y-1/2 text-gray-300">
+                      <ArrowRight className="h-8 w-8" />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us Features */}
-      <section className="py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Features Section */}
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-dark mb-4">
-              Why Shop With Us?
+              Why Choose Shoppa?
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We go the extra mile to ensure your shopping experience is exceptional
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We're committed to providing the best online shopping experience in Nigeria
             </p>
           </div>
 
@@ -163,13 +165,26 @@ const HowItWorks = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="card p-8 text-center hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+                className="relative group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100"
               >
-                <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <div className="text-primary">{feature.icon}</div>
+                {/* Icon */}
+                <div className="bg-gradient-to-br from-primary to-primary-dark w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
+                  <div className="text-white">{feature.icon}</div>
                 </div>
-                <h3 className="text-xl font-bold text-dark mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+
+                {/* Content */}
+                <h3 className="text-xl font-bold text-dark mb-3 text-center">{feature.title}</h3>
+                <p className="text-gray-600 text-center mb-4 leading-relaxed">{feature.description}</p>
+                
+                {/* Stat Badge */}
+                <div className="text-center">
+                  <span className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold">
+                    {feature.stat}
+                  </span>
+                </div>
+
+                {/* Hover Border Effect */}
+                <div className="absolute inset-0 rounded-2xl border-2 border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
             ))}
           </div>
@@ -177,51 +192,51 @@ const HowItWorks = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-primary-dark text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Start Shopping?
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Join thousands of satisfied customers across Nigeria
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="/shop"
-              className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-xl inline-block"
-            >
-              Browse Products
-            </a>
-            <a
-              href="/register"
-              className="bg-dark text-white px-8 py-4 rounded-lg font-semibold hover:bg-dark-light transition-colors shadow-xl inline-block"
-            >
-              Create Account
-            </a>
-          </div>
-        </div>
-      </section>
+      <section className="relative py-24 overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary-dark to-dark"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Experience Seamless Shopping?
+            </h2>
+            <p className="text-xl mb-10 text-white/90 max-w-2xl mx-auto">
+              Join over 10,000 satisfied customers who trust Shoppa for their online shopping needs across Nigeria
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              <Link
+                to="/shop"
+                className="group bg-white text-primary px-10 py-5 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-105 inline-flex items-center space-x-2"
+              >
+                <span>Start Shopping Now</span>
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                to="/register"
+                className="bg-dark text-white px-10 py-5 rounded-xl font-bold text-lg hover:bg-dark-light transition-all duration-300 shadow-2xl hover:scale-105 inline-block"
+              >
+                Create Free Account
+              </Link>
+            </div>
 
-      {/* FAQ Quick Links */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-dark mb-6">Still Have Questions?</h2>
-          <p className="text-gray-600 mb-8">
-            Check out our FAQ page or contact our support team for assistance
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="/faqs"
-              className="btn-primary inline-block"
-            >
-              View FAQs
-            </a>
-            <a
-              href="/contact"
-              className="btn-secondary inline-block"
-            >
-              Contact Support
-            </a>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto pt-8 border-t border-white/20">
+              <div>
+                <div className="text-4xl font-bold mb-2">10K+</div>
+                <div className="text-white/80">Happy Customers</div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold mb-2">500+</div>
+                <div className="text-white/80">Products</div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold mb-2">99%</div>
+                <div className="text-white/80">Satisfaction</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
