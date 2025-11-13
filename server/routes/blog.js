@@ -215,7 +215,16 @@ router.post('/:id/reaction', optionalAuth, async (req, res) => {
       [reactions[0].likes, reactions[0].loves, reactions[0].insightful, reactions[0].celebrate, req.params.id]
     );
 
-    res.json({ message: 'Reaction added successfully' });
+    // Return updated counts
+    res.json({ 
+      message: 'Reaction added successfully',
+      counts: {
+        likes_count: reactions[0].likes || 0,
+        loves_count: reactions[0].loves || 0,
+        insightful_count: reactions[0].insightful || 0,
+        celebrate_count: reactions[0].celebrate || 0
+      }
+    });
   } catch (error) {
     console.error('Add reaction error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });

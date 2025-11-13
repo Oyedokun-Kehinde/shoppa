@@ -148,14 +148,27 @@ const BlogDetail = () => {
         ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
         : {};
 
-      await axios.post(
+      const response = await axios.post(
         `http://localhost:5000/api/blog/${post.id}/reaction`,
         payload,
         { headers }
       );
 
       setUserReaction(type);
+      
+      // Update post counts immediately if response includes them
+      if (response.data.counts) {
+        setPost({
+          ...post,
+          likes_count: response.data.counts.likes_count,
+          loves_count: response.data.counts.loves_count,
+          insightful_count: response.data.counts.insightful_count,
+          celebrate_count: response.data.counts.celebrate_count
+        });
+      }
+      
       toast.success(`Reacted with ${type}!`);
+      // Also refresh to ensure data consistency
       fetchBlogPost();
     } catch (error: any) {
       console.error('Reaction error:', error);

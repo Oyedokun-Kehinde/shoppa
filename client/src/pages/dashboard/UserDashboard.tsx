@@ -134,21 +134,21 @@ const UserDashboard = () => {
                     </div>
                   ) : orders.length > 0 ? (
                     <div className="space-y-4">
-                      {orders.slice(0, 3).map((order: any) => (
-                        <div key={order._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      {orders.slice(0, 3).map((order: any, idx: number) => (
+                        <div key={order._id || order.id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                           <div className="flex items-center space-x-4">
-                            {getStatusIcon(order.status)}
+                            {getStatusIcon(order.status || 'Pending')}
                             <div>
-                              <p className="font-semibold">Order #{order._id.slice(-8)}</p>
+                              <p className="font-semibold">Order #{(order._id || order.id || 'N/A').toString().slice(-8)}</p>
                               <p className="text-sm text-gray-600">
-                                {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date unavailable'}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-primary">₦{order.totalPrice.toLocaleString()}</p>
-                            <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(order.status)}`}>
-                              {order.status}
+                            <p className="font-bold text-primary">₦{(order.totalPrice || 0).toLocaleString()}</p>
+                            <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(order.status || 'Pending')}`}>
+                              {order.status || 'Pending'}
                             </span>
                           </div>
                         </div>
@@ -212,18 +212,18 @@ const UserDashboard = () => {
                   </div>
                 ) : orders.length > 0 ? (
                   <div className="space-y-6">
-                    {orders.map((order: any) => (
-                      <div key={order._id} className="card p-6">
+                    {orders.map((order: any, orderIdx: number) => (
+                      <div key={order._id || order.id || orderIdx} className="card p-6">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                           <div>
-                            <h3 className="font-bold text-lg mb-1">Order #{order._id.slice(-8)}</h3>
+                            <h3 className="font-bold text-lg mb-1">Order #{(order._id || order.id || 'N/A').toString().slice(-8)}</h3>
                             <p className="text-sm text-gray-600">
-                              Placed on {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date unavailable'}
                             </p>
                           </div>
                           <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                            <span className={`text-sm px-4 py-2 rounded-full font-semibold ${getStatusColor(order.status)}`}>
-                              {order.status}
+                            <span className={`text-sm px-4 py-2 rounded-full font-semibold ${getStatusColor(order.status || 'Pending')}`}>
+                              {order.status || 'Pending'}
                             </span>
                             <span className={`text-sm px-4 py-2 rounded-full font-semibold ${
                               order.isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -235,7 +235,7 @@ const UserDashboard = () => {
 
                         <div className="border-t border-gray-200 pt-4">
                           <div className="space-y-3 mb-4">
-                            {order.orderItems.map((item: any, idx: number) => (
+                            {(order.orderItems || []).map((item: any, idx: number) => (
                               <div key={idx} className="flex items-center space-x-4">
                                 <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
                                 <div className="flex-1">
@@ -250,14 +250,16 @@ const UserDashboard = () => {
                           <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                             <div className="flex items-center space-x-2 text-gray-600">
                               <MapPin className="h-4 w-4" />
-                              <span className="text-sm">{order.shippingAddress.city}, {order.shippingAddress.country}</span>
+                              <span className="text-sm">
+                                {order.shippingAddress ? `${order.shippingAddress.city || 'N/A'}, ${order.shippingAddress.country || 'N/A'}` : 'Address not available'}
+                              </span>
                             </div>
-                            <p className="text-2xl font-bold text-primary">₦{order.totalPrice.toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-primary">₦{(order.totalPrice || 0).toLocaleString()}</p>
                           </div>
                         </div>
 
                         <div className="mt-4 flex space-x-3">
-                          <Link to={`/orders/${order._id}`} className="btn-outline flex-1 text-center">
+                          <Link to={`/orders/${order._id || order.id || ''}`} className="btn-outline flex-1 text-center">
                             View Details
                           </Link>
                           {order.isPaid && (
