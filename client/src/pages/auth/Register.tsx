@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail, User } from 'lucide-react';
+import { Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../lib/api';
@@ -9,6 +10,26 @@ const Register = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const password = watch('password');
+
+  const getPasswordStrength = (password: string) => {
+    if (!password) return { strength: '', color: '', text: '' };
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+
+    if (strength <= 1) return { strength: 'Weak', color: 'bg-red-500', text: 'text-red-600' };
+    if (strength === 2) return { strength: 'Fair', color: 'bg-yellow-500', text: 'text-yellow-600' };
+    if (strength === 3) return { strength: 'Good', color: 'bg-blue-500', text: 'text-blue-600' };
+    return { strength: 'Strong', color: 'bg-green-500', text: 'text-green-600' };
+  };
+
+  const passwordStrength = getPasswordStrength(password || '');
 
   const onSubmit = async (data: any) => {
     try {
@@ -78,7 +99,7 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   {...register('password', {
                     required: 'Password is required',
                     minLength: {
@@ -86,10 +107,36 @@ const Register = () => {
                       message: 'Password must be at least 6 characters',
                     },
                   })}
-                  className="input-field pl-10"
+                  className="input-field pl-10 pr-10"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
+              {password && (
+                <div className="mt-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-gray-600">Password Strength:</span>
+                    <span className={`text-xs font-semibold ${passwordStrength.text}`}>
+                      {passwordStrength.strength}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                      style={{ width: `${(password.length / 20) * 100}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Use 8+ characters with a mix of letters, numbers & symbols
+                  </p>
+                </div>
+              )}
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password.message as string}</p>
               )}
@@ -100,15 +147,22 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   {...register('confirmPassword', {
                     required: 'Please confirm your password',
                     validate: (value) =>
                       value === watch('password') || 'Passwords do not match',
                   })}
-                  className="input-field pl-10"
+                  className="input-field pl-10 pr-10"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
               {errors.confirmPassword && (
                 <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message as string}</p>

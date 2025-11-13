@@ -32,6 +32,7 @@ import AdminDashboard from './pages/dashboard/AdminDashboard';
 
 // Components
 import AnnouncementModal from './components/AnnouncementModal';
+import LiveChat from './components/LiveChat';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) => {
@@ -103,6 +104,7 @@ function App() {
         <Footer />
       </div>
       <Toaster position="top-right" />
+      <LiveChat />
     </Router>
   );
 }

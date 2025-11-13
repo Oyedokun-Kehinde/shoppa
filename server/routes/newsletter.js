@@ -1,6 +1,6 @@
-import express from 'express';
-import { body, validationResult } from 'express-validator';
-import Newsletter from '../models/Newsletter.js';
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { getPool } = require('../config/database');
 
 const router = express.Router();
 
@@ -18,23 +18,26 @@ router.post(
 
     try {
       const { email } = req.body;
+      const pool = getPool();
 
       // Check if email already exists
-      const existingSubscription = await Newsletter.findOne({ email });
-      if (existingSubscription) {
-        if (existingSubscription.subscribed) {
+      const [existing] = await pool.query('SELECT * FROM newsletter WHERE email = ?', [email]);
+      
+      if (existing.length > 0) {
+        if (existing[0].subscribed) {
           return res.status(400).json({ message: 'This email is already subscribed to our newsletter' });
         } else {
           // Resubscribe
-          existingSubscription.subscribed = true;
-          existingSubscription.subscribedAt = Date.now();
-          await existingSubscription.save();
+          await pool.query(
+            'UPDATE newsletter SET subscribed = TRUE, subscribed_at = NOW(), unsubscribed_at = NULL WHERE email = ?',
+            [email]
+          );
           return res.json({ message: 'Successfully resubscribed to our newsletter!' });
         }
       }
 
       // Create new subscription
-      await Newsletter.create({ email });
+      await pool.query('INSERT INTO newsletter (email) VALUES (?)', [email]);
 
       res.status(201).json({ message: 'Successfully subscribed to our newsletter!' });
     } catch (error) {
@@ -58,14 +61,17 @@ router.post(
 
     try {
       const { email } = req.body;
+      const pool = getPool();
 
-      const subscription = await Newsletter.findOne({ email });
-      if (!subscription) {
+      const [subscription] = await pool.query('SELECT * FROM newsletter WHERE email = ?', [email]);
+      if (subscription.length === 0) {
         return res.status(404).json({ message: 'Email not found in our newsletter list' });
       }
 
-      subscription.subscribed = false;
-      await subscription.save();
+      await pool.query(
+        'UPDATE newsletter SET subscribed = FALSE, unsubscribed_at = NOW() WHERE email = ?',
+        [email]
+      );
 
       res.json({ message: 'Successfully unsubscribed from our newsletter' });
     } catch (error) {
@@ -75,4 +81,4 @@ router.post(
   }
 );
 
-export default router;
+module.exports = router;

@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useCartStore } from '../../store/cartStore';
+import { useWishlistStore } from '../../store/wishlistStore';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
   const { getTotalItems } = useCartStore();
+  const wishlist = useWishlistStore((state) => state.items);
 
   const navigation = [
     { name: 'Home', path: '/' },
@@ -41,6 +43,16 @@ const Navbar = () => {
 
           {/* Right Side Icons */}
           <div className="flex items-center space-x-6">
+            {/* Wishlist Icon */}
+            <Link to="/dashboard?tab=wishlist" className="relative">
+              <Heart className="h-6 w-6 text-dark hover:text-primary transition-colors" />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                  {wishlist.length}
+                </span>
+              )}
+            </Link>
+
             {/* Cart Icon */}
             <Link to="/cart" className="relative">
               <ShoppingCart className="h-6 w-6 text-dark hover:text-primary transition-colors" />

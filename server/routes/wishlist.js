@@ -1,6 +1,6 @@
-import express from 'express';
-import Wishlist from '../models/Wishlist.js';
-import { protect } from '../middleware/auth.js';
+const express = require('express');
+const { getPool } = require('../config/database');
+const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -9,14 +9,17 @@ const router = express.Router();
 // @access  Private
 router.get('/', protect, async (req, res) => {
   try {
-    let wishlist = await Wishlist.findOne({ user: req.user.id }).populate('items.product');
-    
-    if (!wishlist) {
-      wishlist = await Wishlist.create({ user: req.user.id, items: [] });
-    }
+    const pool = getPool();
+    const [wishlist] = await pool.query(
+      `SELECT w.*, p.* FROM wishlist w
+       JOIN products p ON w.product_id = p.id
+       WHERE w.user_id = ?`,
+      [req.user.id]
+    );
 
-    res.json(wishlist);
+    res.json(wishlist || []);
   } catch (error) {
+    console.error('Get wishlist error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -27,31 +30,26 @@ router.get('/', protect, async (req, res) => {
 router.post('/', protect, async (req, res) => {
   try {
     const { productId } = req.body;
+    const pool = getPool();
 
-    let wishlist = await Wishlist.findOne({ user: req.user.id });
+    // Check if already exists
+    const [existing] = await pool.query(
+      'SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?',
+      [req.user.id, productId]
+    );
 
-    if (!wishlist) {
-      wishlist = await Wishlist.create({
-        user: req.user.id,
-        items: [{ product: productId }],
-      });
-    } else {
-      // Check if product already in wishlist
-      const alreadyExists = wishlist.items.some(
-        (item) => item.product.toString() === productId
-      );
-
-      if (alreadyExists) {
-        return res.status(400).json({ message: 'Product already in wishlist' });
-      }
-
-      wishlist.items.push({ product: productId });
-      await wishlist.save();
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'Product already in wishlist' });
     }
 
-    await wishlist.populate('items.product');
-    res.json(wishlist);
+    await pool.query(
+      'INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)',
+      [req.user.id, productId]
+    );
+
+    res.json({ message: 'Added to wishlist' });
   } catch (error) {
+    console.error('Add to wishlist error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -61,21 +59,15 @@ router.post('/', protect, async (req, res) => {
 // @access  Private
 router.delete('/:productId', protect, async (req, res) => {
   try {
-    const wishlist = await Wishlist.findOne({ user: req.user.id });
-
-    if (!wishlist) {
-      return res.status(404).json({ message: 'Wishlist not found' });
-    }
-
-    wishlist.items = wishlist.items.filter(
-      (item) => item.product.toString() !== req.params.productId
+    const pool = getPool();
+    await pool.query(
+      'DELETE FROM wishlist WHERE user_id = ? AND product_id = ?',
+      [req.user.id, req.params.productId]
     );
 
-    await wishlist.save();
-    await wishlist.populate('items.product');
-
-    res.json(wishlist);
+    res.json({ message: 'Removed from wishlist' });
   } catch (error) {
+    console.error('Remove from wishlist error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -85,19 +77,14 @@ router.delete('/:productId', protect, async (req, res) => {
 // @access  Private
 router.delete('/', protect, async (req, res) => {
   try {
-    const wishlist = await Wishlist.findOne({ user: req.user.id });
-
-    if (!wishlist) {
-      return res.status(404).json({ message: 'Wishlist not found' });
-    }
-
-    wishlist.items = [];
-    await wishlist.save();
+    const pool = getPool();
+    await pool.query('DELETE FROM wishlist WHERE user_id = ?', [req.user.id]);
 
     res.json({ message: 'Wishlist cleared' });
   } catch (error) {
+    console.error('Clear wishlist error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-export default router;
+module.exports = router;

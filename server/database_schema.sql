@@ -107,6 +107,21 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insert sample products
+-- Chat inquiries table
+CREATE TABLE IF NOT EXISTS chat_inquiries (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  question TEXT NOT NULL,
+  status ENUM('pending', 'in-progress', 'resolved') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  resolved_at TIMESTAMP NULL,
+  INDEX idx_email (email),
+  INDEX idx_status (status),
+  INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert sample products
 INSERT INTO products (name, description, price, image, category, stock, rating, num_reviews) VALUES
 ('Wireless Headphones', 'Premium noise-cancelling wireless headphones with 30-hour battery life', 129.99, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Electronics', 50, 4.8, 245),
 ('Smart Watch Pro', 'Advanced fitness tracking with heart rate monitor and GPS', 299.99, 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500', 'Electronics', 30, 4.7, 189),

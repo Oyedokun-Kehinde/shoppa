@@ -31,10 +31,15 @@ const Shop = () => {
     try {
       setLoading(true);
       const response = await api.get('/products');
+      console.log('Products fetched:', response.data);
       setProducts(response.data);
-    } catch (error) {
+      if (response.data.length === 0) {
+        toast.error('No products found in database');
+      }
+    } catch (error: any) {
       console.error('Error fetching products:', error);
-      toast.error('Failed to load products');
+      console.error('Error details:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Failed to load products');
     } finally {
       setLoading(false);
     }

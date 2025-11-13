@@ -1,7 +1,6 @@
-import express from 'express';
-import { body, validationResult } from 'express-validator';
-import { sendContactEmail } from '../utils/email.js';
-import Contact from '../models/Contact.js';
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const { getPool } = require('../config/database');
 
 const router = express.Router();
 
@@ -26,25 +25,14 @@ router.post(
       const { name, email, subject, message } = req.body;
 
       // Save to database
-      await Contact.create({
-        name,
-        email,
-        subject,
-        message,
-      });
+      const pool = getPool();
+      await pool.query(
+        'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+        [name, email, subject, message]
+      );
 
-      // Try to send email (non-blocking)
-      try {
-        await sendContactEmail({
-          name,
-          email,
-          subject,
-          message,
-        });
-      } catch (emailError) {
-        console.error('Email send error:', emailError);
-        // Continue even if email fails
-      }
+      // Email functionality can be added later
+      // For now, we just save to database
 
       res.json({ message: 'Message sent successfully! We will get back to you soon.' });
     } catch (error) {
@@ -54,4 +42,4 @@ router.post(
   }
 );
 
-export default router;
+module.exports = router;
