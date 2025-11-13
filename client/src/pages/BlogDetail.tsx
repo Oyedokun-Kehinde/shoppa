@@ -271,7 +271,7 @@ const BlogDetail = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {reactions.map((reaction) => {
                   const Icon = reaction.icon;
-                  const count = post[`${reaction.type}s_count` as keyof BlogPost] as number;
+                  const count = post[`${reaction.type}s_count` as keyof BlogPost] as number || 0;
                   const isActive = userReaction === reaction.type;
                   
                   return (
@@ -284,9 +284,9 @@ const BlogDetail = () => {
                           : 'border-gray-200 hover:border-primary'
                       }`}
                     >
-                      <Icon className={`h-8 w-8 mx-auto mb-2 ${isActive ? 'text-primary' : reaction.color}`} />
-                      <p className="font-semibold text-dark text-sm">{reaction.label}</p>
-                      <p className="text-gray-500 text-xs mt-1">{count}</p>
+                      <Icon className={`h-8 w-8 mx-auto mb-3 ${isActive ? 'text-primary' : reaction.color}`} />
+                      <p className="font-semibold text-dark text-base mb-2">{reaction.label}</p>
+                      <p className="text-2xl font-bold text-primary">{count}</p>
                     </button>
                   );
                 })}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
-import { MapPin, CreditCard, Package, ArrowRight } from 'lucide-react';
+import { MapPin, CreditCard, Package, ArrowRight, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
 
@@ -42,6 +42,13 @@ const Checkout = () => {
     setProcessing(true);
 
     try {
+      // Validate user email
+      if (!user?.email) {
+        toast.error('User email is required for payment');
+        setProcessing(false);
+        return;
+      }
+
       // Create order
       const orderData = {
         orderItems: items.map((item) => ({
@@ -64,64 +71,103 @@ const Checkout = () => {
         totalPrice,
       };
 
+      console.log('Creating order with data:', orderData);
       const orderResponse = await api.post('/orders', orderData);
+      console.log('Order created:', orderResponse.data);
       const order = orderResponse.data;
 
       // Initialize Paystack payment
+      console.log('Initializing Paystack with:', {
+        orderId: order._id || order.id,
+        email: user?.email,
+        amount: totalPrice
+      });
+      
       const paymentResponse = await api.post('/orders/paystack/initialize', {
-        orderId: order._id,
+        orderId: order._id || order.id,
         email: user?.email,
         amount: totalPrice,
       });
+      
+      console.log('Paystack initialized:', paymentResponse.data);
 
       // Load Paystack inline script if not already loaded
       if (!window.PaystackPop) {
+        console.log('Loading Paystack script...');
         const script = document.createElement('script');
         script.src = 'https://js.paystack.co/v1/inline.js';
         script.async = true;
         document.body.appendChild(script);
         
-        await new Promise((resolve) => {
-          script.onload = resolve;
+        await new Promise((resolve, reject) => {
+          script.onload = () => {
+            console.log('Paystack script loaded successfully');
+            resolve(true);
+          };
+          script.onerror = () => {
+            console.error('Failed to load Paystack script');
+            reject(new Error('Failed to load Paystack script'));
+          };
         });
       }
+
+      // Verify Paystack is available
+      if (!window.PaystackPop) {
+        throw new Error('Paystack library not available');
+      }
+
+      console.log('Setting up Paystack popup with reference:', paymentResponse.data.reference);
 
       // Open Paystack popup
       const handler = window.PaystackPop.setup({
         key: 'pk_test_97ea3775550f1bd74cdaa1818a57b6a280f177e8', // Paystack Test Public Key
-        email: user?.email,
+        email: user.email,
         amount: Math.round(totalPrice * 100), // Convert to kobo
         ref: paymentResponse.data.reference,
+        currency: 'NGN',
         metadata: {
-          orderId: order._id,
+          orderId: order._id || order.id,
+          custom_fields: [
+            {
+              display_name: "Order ID",
+              variable_name: "order_id",
+              value: String(order._id || order.id)
+            }
+          ]
         },
         onClose: function() {
+          console.log('Payment popup closed');
           toast.error('Payment cancelled');
           setProcessing(false);
         },
-        callback: async function(response: any) {
-          try {
-            // Verify payment
-            await api.post('/orders/paystack/verify', {
-              reference: response.reference,
-            });
-
-            toast.success('Payment successful!');
+        callback: function(response: any) {
+          console.log('Payment callback received:', response);
+          // Handle verification asynchronously but callback itself is sync
+          api.post('/orders/paystack/verify', {
+            reference: response.reference,
+          })
+          .then((verifyResponse) => {
+            console.log('Payment verified:', verifyResponse.data);
+            toast.success('Payment successful! 🎉');
             clearCart();
-            navigate(`/orders/${order._id}`);
-          } catch (error) {
+            navigate(`/orders/${order._id || order.id}`);
+          })
+          .catch((error: any) => {
             console.error('Payment verification failed:', error);
-            toast.error('Payment verification failed');
-          } finally {
+            toast.error(error.response?.data?.message || 'Payment verification failed');
+          })
+          .finally(() => {
             setProcessing(false);
-          }
+          });
         },
       });
 
+      console.log('Opening Paystack iframe...');
       handler.openIframe();
     } catch (error: any) {
       console.error('Checkout error:', error);
-      toast.error(error.response?.data?.message || 'Checkout failed. Please try again.');
+      console.error('Error details:', error.response?.data);
+      toast.error(error.response?.data?.message || error.message || 'Checkout failed. Please try again.');
       setProcessing(false);
     }
   };
@@ -209,15 +255,20 @@ const Checkout = () => {
                   <h2 className="text-2xl font-bold">Payment Method</h2>
                 </div>
 
-                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <img
-                    src="https://paystack.com/assets/logo/white.svg"
-                    alt="Paystack"
-                    className="h-8 bg-primary px-4 py-2 rounded"
-                  />
-                  <div>
-                    <p className="font-semibold">Secure Payment with Paystack</p>
-                    <p className="text-sm text-gray-600">Card, Bank Transfer, USSD, Mobile Money</p>
+                <div className="flex items-center space-x-4 p-5 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border-2 border-blue-200">
+                  <div className="bg-primary px-4 py-2 rounded-lg">
+                    <svg className="h-8 w-20" viewBox="0 0 200 50" fill="white">
+                      <text x="10" y="35" fontSize="28" fontWeight="bold" fontFamily="Arial, sans-serif">
+                        Paystack
+                      </text>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-dark flex items-center">
+                      <Shield className="h-4 w-4 text-green-600 mr-2" />
+                      Secure Payment with Paystack
+                    </p>
+                    <p className="text-sm text-gray-600">💳 Card • 🏦 Bank Transfer • 📱 USSD • 💰 Mobile Money</p>
                   </div>
                 </div>
               </div>

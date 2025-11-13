@@ -145,9 +145,9 @@ const UserDashboard = () => {
                     <div className="text-center py-12">
                       <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
                     </div>
-                  ) : orders.length > 0 ? (
+                  ) : (orders && orders.length > 0) ? (
                     <div className="space-y-4">
-                      {orders.slice(0, 3).map((order: any, idx: number) => (
+                      {(orders || []).slice(0, 3).map((order: any, idx: number) => (
                         <div key={order._id || order.id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                           <div className="flex items-center space-x-4">
                             {getStatusIcon(order.status || 'Pending')}
@@ -187,7 +187,7 @@ const UserDashboard = () => {
                   <div>
                     <h2 className="text-2xl font-bold mb-6">Your Wishlist</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {wishlistItems.slice(0, 4).map((item: any) => (
+                      {(wishlistItems || []).slice(0, 4).map((item: any) => (
                         <Link
                           key={item.id}
                           to={`/shop`}
@@ -223,9 +223,9 @@ const UserDashboard = () => {
                   <div className="text-center py-12">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
                   </div>
-                ) : orders.length > 0 ? (
+                ) : (orders && orders.length > 0) ? (
                   <div className="space-y-6">
-                    {orders.map((order: any, orderIdx: number) => (
+                    {(orders || []).map((order: any, orderIdx: number) => (
                       <div key={order._id || order.id || orderIdx} className="card p-6">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                           <div>
