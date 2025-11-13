@@ -162,6 +162,144 @@ const About = () => {
         </div>
       </section>
 
+      {/* Vision & Mission Section */}
+      <section className="py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-dark mb-4">Vision & Mission</h2>
+            <p className="text-xl text-gray-600">
+              Guiding our path to excellence
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            {/* Vision */}
+            <div className="card p-10 hover:shadow-2xl transition-all duration-300 border-t-4 border-primary">
+              <div className="flex items-center mb-6">
+                <div className="bg-primary/10 p-4 rounded-xl">
+                  <Target className="h-10 w-10 text-primary" />
+                </div>
+                <h3 className="text-3xl font-bold text-dark ml-4">Our Vision</h3>
+              </div>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                To become Nigeria's leading e-commerce platform, setting the standard for quality, 
+                accessibility, and customer satisfaction. We envision a future where every Nigerian, 
+                from Akure to Lagos, can access premium products with ease, delivered right to their doorstep 
+                with exceptional service.
+              </p>
+            </div>
+
+            {/* Mission */}
+            <div className="card p-10 hover:shadow-2xl transition-all duration-300 border-t-4 border-blue-600">
+              <div className="flex items-center mb-6">
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <Award className="h-10 w-10 text-blue-600" />
+                </div>
+                <h3 className="text-3xl font-bold text-dark ml-4">Our Mission</h3>
+              </div>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                To empower Nigerian consumers by providing a seamless online shopping experience 
+                with authentic products, competitive prices, and reliable delivery. We are committed 
+                to supporting local businesses while bringing the world's best products to your doorstep, 
+                serving Akure, Ondo State, and all of Nigeria.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Commitment Section */}
+      <section className="py-24 bg-gradient-to-r from-dark via-gray-900 to-dark text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Our Commitment to You</h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              We pledge to uphold the highest standards in every aspect of our business
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Commitment 1 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+              <div className="bg-primary/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Customer-Centric Service</h3>
+              <p className="text-gray-300 leading-relaxed">
+                Your satisfaction is our priority. We guarantee responsive customer support, 
+                easy returns, and a shopping experience that exceeds your expectations. From Akure 
+                to every corner of Nigeria, we're here for you 24/7.
+              </p>
+            </div>
+
+            {/* Commitment 2 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+              <div className="bg-green-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <Award className="h-8 w-8 text-green-400" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Quality Assurance</h3>
+              <p className="text-gray-300 leading-relaxed">
+                Every product is carefully vetted for authenticity and quality. We work directly with 
+                trusted manufacturers and suppliers to ensure you receive only genuine, high-quality items 
+                that meet international standards.
+              </p>
+            </div>
+
+            {/* Commitment 3 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+              <div className="bg-blue-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <TrendingUp className="h-8 w-8 text-blue-400" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Continuous Innovation</h3>
+              <p className="text-gray-300 leading-relaxed">
+                We embrace technology and innovation to improve your shopping experience. From AI-powered 
+                recommendations to seamless payment options, we're constantly evolving to serve you better 
+                and make online shopping effortless.
+              </p>
+            </div>
+
+            {/* Commitment 4 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+              <div className="bg-yellow-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <Target className="h-8 w-8 text-yellow-400" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Fast & Reliable Delivery</h3>
+              <p className="text-gray-300 leading-relaxed">
+                We understand the importance of timely delivery. Our logistics network ensures your orders 
+                reach you quickly and safely, whether you're in Akure, Lagos, or any part of Nigeria. 
+                Track every step of your order in real-time.
+              </p>
+            </div>
+
+            {/* Commitment 5 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+              <div className="bg-purple-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <Award className="h-8 w-8 text-purple-400" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Competitive Pricing</h3>
+              <p className="text-gray-300 leading-relaxed">
+                Premium quality shouldn't mean premium prices. We negotiate the best deals with suppliers 
+                and pass the savings to you. Enjoy authentic products at prices that respect your budget, 
+                with regular discounts and promotions.
+              </p>
+            </div>
+
+            {/* Commitment 6 */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+              <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <Users className="h-8 w-8 text-red-400" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Community Building</h3>
+              <p className="text-gray-300 leading-relaxed">
+                We're more than a store—we're a community. By supporting Shoppa, you're supporting local 
+                Nigerian businesses, jobs, and economic growth. Together, we're building a stronger, 
+                more connected Nigeria.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section className="bg-primary text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

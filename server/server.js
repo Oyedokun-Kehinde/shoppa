@@ -21,9 +21,29 @@ connectDB();
 
 const app = express();
 
-// Middleware
+// Middleware - CORS Configuration (Allow multiple origins)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:54254', // Browser preview
+  process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is in allowed list or matches localhost/127.0.0.1 pattern
+    if (allowedOrigins.includes(origin) || 
+        origin.startsWith('http://localhost:') || 
+        origin.startsWith('http://127.0.0.1:')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
