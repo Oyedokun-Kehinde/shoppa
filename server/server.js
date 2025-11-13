@@ -1,15 +1,15 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import connectDB from './config/database.js';
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const { connectDB } = require('./config/database');
 
 // Routes
-import authRoutes from './routes/auth.js';
-import productRoutes from './routes/products.js';
-import contactRoutes from './routes/contact.js';
-import wishlistRoutes from './routes/wishlist.js';
-import orderRoutes from './routes/orders.js';
-import newsletterRoutes from './routes/newsletter.js';
+const authRoutes = require('./routes/auth');
+const productRoutes = require('./routes/products');
+const contactRoutes = require('./routes/contact');
+const wishlistRoutes = require('./routes/wishlist');
+const orderRoutes = require('./routes/orders');
+const newsletterRoutes = require('./routes/newsletter');
 
 // Load env vars
 dotenv.config();

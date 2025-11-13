@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+const jwt = require('jsonwebtoken');
+const { getPool } = require('../config/database');
 
-export const protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     let token;
 
@@ -14,22 +14,31 @@ export const protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
+    
+    const pool = getPool();
+    const [users] = await pool.query(
+      'SELECT id, name, email, role FROM users WHERE id = ?',
+      [decoded.id]
+    );
 
-    if (!req.user) {
+    if (users.length === 0) {
       return res.status(401).json({ message: 'User not found' });
     }
 
+    req.user = users[0];
     next();
   } catch (error) {
+    console.error('Auth middleware error:', error);
     return res.status(401).json({ message: 'Not authorized, token failed' });
   }
 };
 
-export const admin = (req, res, next) => {
+const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();
   } else {
     res.status(403).json({ message: 'Not authorized as admin' });
   }
 };
+
+module.exports = { protect, admin };

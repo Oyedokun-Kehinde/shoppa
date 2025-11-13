@@ -1,6 +1,6 @@
-import express from 'express';
-import Product from '../models/Product.js';
-import { protect, admin } from '../middleware/auth.js';
+const express = require('express');
+const { getPool } = require('../config/database');
+const { protect, admin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -10,19 +10,27 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const { category, search } = req.query;
-    let query = {};
+    const pool = getPool();
+    
+    let query = 'SELECT * FROM products WHERE 1=1';
+    const params = [];
 
     if (category && category !== 'All') {
-      query.category = category;
+      query += ' AND category = ?';
+      params.push(category);
     }
 
     if (search) {
-      query.name = { $regex: search, $options: 'i' };
+      query += ' AND name LIKE ?';
+      params.push(`%${search}%`);
     }
 
-    const products = await Product.find(query).sort({ createdAt: -1 });
+    query += ' ORDER BY created_at DESC';
+
+    const [products] = await pool.query(query, params);
     res.json(products);
   } catch (error) {
+    console.error('Get products error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -32,14 +40,19 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const pool = getPool();
+    const [products] = await pool.query(
+      'SELECT * FROM products WHERE id = ?',
+      [req.params.id]
+    );
 
-    if (!product) {
+    if (products.length === 0) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    res.json(product);
+    res.json(products[0]);
   } catch (error) {
+    console.error('Get product error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -50,18 +63,21 @@ router.get('/:id', async (req, res) => {
 router.post('/', protect, admin, async (req, res) => {
   try {
     const { name, description, price, category, image, stock } = req.body;
+    const pool = getPool();
 
-    const product = await Product.create({
-      name,
-      description,
-      price,
-      category,
-      image,
-      stock,
-    });
+    const [result] = await pool.query(
+      'INSERT INTO products (name, description, price, category, image, stock) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, description, price, category, image, stock || 0]
+    );
 
-    res.status(201).json(product);
+    const [products] = await pool.query(
+      'SELECT * FROM products WHERE id = ?',
+      [result.insertId]
+    );
+
+    res.status(201).json(products[0]);
   } catch (error) {
+    console.error('Create product error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -71,19 +87,26 @@ router.post('/', protect, admin, async (req, res) => {
 // @access  Private/Admin
 router.put('/:id', protect, admin, async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const pool = getPool();
+    const { name, description, price, category, image, stock } = req.body;
 
-    if (!product) {
+    const [result] = await pool.query(
+      'UPDATE products SET name = ?, description = ?, price = ?, category = ?, image = ?, stock = ? WHERE id = ?',
+      [name, description, price, category, image, stock, req.params.id]
+    );
+
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const [products] = await pool.query(
+      'SELECT * FROM products WHERE id = ?',
+      [req.params.id]
+    );
 
-    res.json(updated);
+    res.json(products[0]);
   } catch (error) {
+    console.error('Update product error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -93,17 +116,22 @@ router.put('/:id', protect, admin, async (req, res) => {
 // @access  Private/Admin
 router.delete('/:id', protect, admin, async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const pool = getPool();
+    
+    const [result] = await pool.query(
+      'DELETE FROM products WHERE id = ?',
+      [req.params.id]
+    );
 
-    if (!product) {
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    await Product.findByIdAndDelete(req.params.id);
     res.json({ message: 'Product removed' });
   } catch (error) {
+    console.error('Delete product error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-export default router;
+module.exports = router;
