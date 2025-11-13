@@ -164,6 +164,8 @@ router.post('/paystack/verify', protect, async (req, res) => {
     console.log('========================================');
     console.log('🔍 Verifying payment with reference:', reference);
     console.log('User ID:', req.user.id);
+    console.log('Paystack Secret Key exists:', !!process.env.PAYSTACK_SECRET_KEY);
+    console.log('Paystack Secret Key length:', process.env.PAYSTACK_SECRET_KEY?.length);
     console.log('========================================');
     
     if (!reference) {
@@ -171,8 +173,15 @@ router.post('/paystack/verify', protect, async (req, res) => {
       return res.status(400).json({ message: 'Payment reference is required' });
     }
     
+    if (!process.env.PAYSTACK_SECRET_KEY) {
+      console.error('❌ PAYSTACK_SECRET_KEY not configured!');
+      return res.status(500).json({ message: 'Payment system not configured' });
+    }
+    
     // Verify payment with Paystack
     console.log('📡 Calling Paystack API...');
+    console.log('📡 URL:', `https://api.paystack.co/transaction/verify/${reference}`);
+    
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -203,8 +212,6 @@ router.post('/paystack/verify', protect, async (req, res) => {
       console.log('🔑 Order ID from metadata:', orderId);
       console.log('📦 Full metadata:', JSON.stringify(data.metadata, null, 2));
       
-      const pool = getPool();
-      
       if (!orderId) {
         console.error('❌ Order ID not found in metadata');
         console.error('Available metadata:', data.metadata);
@@ -214,11 +221,24 @@ router.post('/paystack/verify', protect, async (req, res) => {
         });
       }
       
+      console.log('📊 Getting database pool...');
+      const pool = getPool();
+      
+      if (!pool) {
+        console.error('❌ Database pool is null or undefined!');
+        return res.status(500).json({ message: 'Database connection error' });
+      }
+      
+      console.log('✅ Database pool obtained');
+      console.log('🔍 Checking if order exists...');
+      
       // Check if order exists and belongs to user
       const [existingOrders] = await pool.query(
         'SELECT * FROM orders WHERE id = ? AND user_id = ?',
         [orderId, req.user.id]
       );
+      
+      console.log('📊 Query result - found', existingOrders.length, 'orders');
 
       if (existingOrders.length === 0) {
         console.error('❌ Order not found or does not belong to user');
@@ -272,15 +292,21 @@ router.post('/paystack/verify', protect, async (req, res) => {
     console.error('❌ PAYMENT VERIFICATION ERROR');
     console.error('Error type:', error.constructor.name);
     console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     console.error('Error response:', error.response?.data);
     console.error('Error status:', error.response?.status);
-    console.error('Full error:', error);
+    console.error('Error config:', error.config);
+    console.error('Is Axios Error:', error.isAxiosError);
+    console.error('Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     console.error('========================================');
     
+    // Send detailed error in development
     res.status(500).json({ 
       success: false,
       message: 'Payment verification failed due to server error', 
-      error: error.response?.data?.message || error.message 
+      error: error.message,
+      details: error.response?.data?.message || error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
