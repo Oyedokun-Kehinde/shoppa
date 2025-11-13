@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useWishlistStore } from '../../store/wishlistStore';
-import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle, Download, Star } from 'lucide-react';
+import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle, Download } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
@@ -72,11 +72,18 @@ const UserDashboard = () => {
     }
   };
 
-  const totalSpent = orders.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+  // Calculate total spent from PAID orders only, using correct database field names
+  const totalSpent = orders.reduce((sum: number, o: any) => {
+    // Only count paid orders
+    if (o.is_paid) {
+      return sum + (o.total_price || o.totalPrice || 0);
+    }
+    return sum;
+  }, 0);
   
   const stats = [
     { icon: <Package className="h-8 w-8" />, label: 'Total Orders', value: orders.length.toString(), color: 'bg-blue-50 text-blue-600' },
-    { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: orders.filter((o: any) => !o.isDelivered).length.toString(), color: 'bg-green-50 text-green-600' },
+    { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: orders.filter((o: any) => !o.is_delivered).length.toString(), color: 'bg-green-50 text-green-600' },
     { icon: <Heart className="h-8 w-8" />, label: 'Wishlist', value: wishlistItems.length.toString(), color: 'bg-pink-50 text-pink-600' },
     { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `₦${totalSpent.toLocaleString()}`, color: 'bg-purple-50 text-purple-600' },
   ];

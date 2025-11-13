@@ -38,6 +38,7 @@ import OrderDetail from './pages/OrderDetail';
 // Components
 import AnnouncementModal from './components/AnnouncementModal';
 import LiveChat from './components/LiveChat';
+import ScrollToTop from './components/ScrollToTop';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) => {
@@ -122,6 +123,7 @@ function App() {
       </div>
       <Toaster position="top-right" />
       <LiveChat />
+      <ScrollToTop />
     </Router>
   );
 }
