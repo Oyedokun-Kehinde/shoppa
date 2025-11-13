@@ -93,13 +93,15 @@ const ProductDetail = () => {
     }
 
     if (product) {
-      addItem({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: quantity
-      });
+      // Add to cart multiple times based on quantity
+      for (let i = 0; i < quantity; i++) {
+        addItem({
+          id: product.id.toString(),
+          name: product.name,
+          price: product.price,
+          image: product.image
+        });
+      }
       toast.success(`${quantity} x ${product.name} added to cart!`);
     }
   };

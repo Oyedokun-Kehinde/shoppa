@@ -19,8 +19,12 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState('featured');
 
   const { addItem } = useCartStore();
-  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
+  const { items: wishlistItems, addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlistStore();
   const { isAuthenticated } = useAuthStore();
+
+  const isInWishlist = (productId: number) => {
+    return wishlistItems.some(item => item.id === productId);
+  };
 
   const categories = ['All', 'Electronics', 'Fashion', 'Home & Living', 'Sports', 'Books'];
 
@@ -92,11 +96,11 @@ const Shop = () => {
       navigate('/login', { state: { from: '/shop' } });
       return;
     }
-    if (isInWishlist(product._id)) {
-      removeFromWishlist(product._id);
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
       toast.success('Removed from wishlist');
     } else {
-      addToWishlist({ _id: product._id, product, addedAt: new Date().toISOString() });
+      addToWishlist({ id: product.id, name: product.name, price: product.price, image: product.image });
       toast.success('Added to wishlist!');
     }
   };
