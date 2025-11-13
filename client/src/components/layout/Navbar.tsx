@@ -4,15 +4,24 @@ import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useCartStore } from '../../store/cartStore';
 import { useWishlistStore } from '../../store/wishlistStore';
+import ConfirmModal from '../ConfirmModal';
+import toast from 'react-hot-toast';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { isAuthenticated, user, logout } = useAuthStore();
   const { getTotalItems } = useCartStore();
   const wishlist = useWishlistStore((state) => state.items);
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully!', { icon: '👋' });
+    navigate('/');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +109,7 @@ const Navbar = () => {
                     Dashboard
                   </Link>
                   <button
-                    onClick={logout}
+                    onClick={() => setShowLogoutModal(true)}
                     className="block w-full text-left px-4 py-3 text-dark hover:bg-gray-50 transition-colors"
                   >
                     Logout
@@ -179,7 +188,7 @@ const Navbar = () => {
                       </Link>
                       <button
                         onClick={() => {
-                          logout();
+                          setShowLogoutModal(true);
                           setIsMenuOpen(false);
                         }}
                         className="w-full text-left py-3 px-4 text-dark hover:bg-gray-50 hover:text-primary rounded-lg transition-all font-medium"
@@ -237,6 +246,19 @@ const Navbar = () => {
           </div>
         </>
       )}
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+        title="Logout"
+        message="Are you sure you want to logout? You'll need to login again to access your account."
+        type="warning"
+        confirmText="Yes, Logout"
+        cancelText="Stay Logged In"
+        icon="logout"
+      />
     </nav>
   );
 };

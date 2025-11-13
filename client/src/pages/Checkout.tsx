@@ -29,7 +29,7 @@ const Checkout = () => {
   }, [isAuthenticated, navigate]);
 
   const total = getTotalPrice();
-  const shippingPrice = total > 50 ? 0 : 10;
+  const shippingPrice = total > 50000 ? 0 : 2000; // Free shipping over ₦50,000, else ₦2,000
   const taxPrice = total * 0.08;
   const totalPrice = total + shippingPrice + taxPrice;
 
@@ -88,7 +88,7 @@ const Checkout = () => {
 
       // Open Paystack popup
       const handler = window.PaystackPop.setup({
-        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_97ea3775550f1bd74cdaa1818a57b6a280f177e8',
+        key: 'pk_test_97ea3775550f1bd74cdaa1818a57b6a280f177e8', // Paystack Test Public Key
         email: user?.email,
         amount: Math.round(totalPrice * 100), // Convert to kobo
         ref: paymentResponse.data.reference,
@@ -263,7 +263,7 @@ const Checkout = () => {
                       <p className="font-semibold text-sm">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-bold">₦{(item.price * item.quantity).toLocaleString()}</p>
                   </div>
                 ))}
               </div>
@@ -271,19 +271,19 @@ const Checkout = () => {
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>₦{total.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>{shippingPrice === 0 ? 'FREE' : `$${shippingPrice.toFixed(2)}`}</span>
+                  <span>{shippingPrice === 0 ? 'FREE' : `₦${shippingPrice.toLocaleString()}`}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Tax (8%)</span>
-                  <span>${taxPrice.toFixed(2)}</span>
+                  <span>₦{taxPrice.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold text-dark pt-3 border-t border-gray-200">
                   <span>Total</span>
-                  <span className="text-primary">${totalPrice.toFixed(2)}</span>
+                  <span className="text-primary">₦{totalPrice.toLocaleString()}</span>
                 </div>
               </div>
 

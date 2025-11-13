@@ -1,9 +1,26 @@
 import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useState } from 'react';
+import ConfirmModal from '../components/ConfirmModal';
+import toast from 'react-hot-toast';
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCartStore();
+  const [itemToRemove, setItemToRemove] = useState<string | null>(null);
+  const [showClearCartModal, setShowClearCartModal] = useState(false);
+
+  const handleRemoveItem = (itemId: string) => {
+    removeItem(itemId);
+    toast.success('Item removed from cart');
+    setItemToRemove(null);
+  };
+
+  const handleClearCart = () => {
+    clearCart();
+    toast.success('Cart cleared successfully');
+    setShowClearCartModal(false);
+  };
 
   if (items.length === 0) {
     return (
@@ -37,7 +54,7 @@ const Cart = () => {
                   />
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold mb-2">{item.name}</h3>
-                    <p className="text-2xl font-bold text-primary">${item.price}</p>
+                    <p className="text-2xl font-bold text-primary">₦{item.price.toLocaleString()}</p>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2 bg-gray-100 rounded-lg">
@@ -56,8 +73,9 @@ const Cart = () => {
                       </button>
                     </div>
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => setItemToRemove(item.id)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Remove item"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -67,7 +85,7 @@ const Cart = () => {
             ))}
 
             <button
-              onClick={clearCart}
+              onClick={() => setShowClearCartModal(true)}
               className="text-red-500 hover:text-red-700 font-semibold"
             >
               Clear Cart
@@ -82,31 +100,31 @@ const Cart = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-semibold">${getTotalPrice().toFixed(2)}</span>
+                  <span className="font-semibold">₦{getTotalPrice().toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-semibold">
-                    {getTotalPrice() > 50 ? 'Free' : '$9.99'}
+                    {getTotalPrice() > 50000 ? 'Free' : '₦2,000'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax</span>
-                  <span className="font-semibold">${(getTotalPrice() * 0.08).toFixed(2)}</span>
+                  <span className="font-semibold">₦{(getTotalPrice() * 0.08).toLocaleString()}</span>
                 </div>
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg">
                     <span className="font-bold">Total</span>
                     <span className="font-bold text-primary">
-                      ${(getTotalPrice() * 1.08 + (getTotalPrice() > 50 ? 0 : 9.99)).toFixed(2)}
+                      ₦{(getTotalPrice() * 1.08 + (getTotalPrice() > 50000 ? 0 : 2000)).toLocaleString()}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {getTotalPrice() < 50 && (
+              {getTotalPrice() < 50000 && (
                 <p className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg">
-                  Add ${(50 - getTotalPrice()).toFixed(2)} more to get free shipping!
+                  Add ₦{(50000 - getTotalPrice()).toLocaleString()} more to get free shipping!
                 </p>
               )}
 
@@ -122,6 +140,34 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      {/* Remove Item Confirmation Modal */}
+      {itemToRemove && (
+        <ConfirmModal
+          isOpen={!!itemToRemove}
+          onClose={() => setItemToRemove(null)}
+          onConfirm={() => handleRemoveItem(itemToRemove)}
+          title="Remove Item?"
+          message="Are you sure you want to remove this item from your cart?"
+          type="danger"
+          confirmText="Yes, Remove"
+          cancelText="Keep Item"
+          icon="delete"
+        />
+      )}
+
+      {/* Clear Cart Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showClearCartModal}
+        onClose={() => setShowClearCartModal(false)}
+        onConfirm={handleClearCart}
+        title="Clear Cart?"
+        message="Are you sure you want to remove all items from your cart? This action cannot be undone."
+        type="danger"
+        confirmText="Yes, Clear Cart"
+        cancelText="Keep Items"
+        icon="cart"
+      />
     </div>
   );
 };

@@ -31,12 +31,24 @@ const Shop = () => {
 
   useEffect(() => {
     fetchProducts();
+    
+    // Set category from URL on initial load
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
   }, []);
 
   useEffect(() => {
     const search = searchParams.get('search');
+    const category = searchParams.get('category');
+    
     if (search) {
       setSearchTerm(search);
+    }
+    
+    if (category) {
+      setSelectedCategory(category);
     }
   }, [searchParams]);
 
