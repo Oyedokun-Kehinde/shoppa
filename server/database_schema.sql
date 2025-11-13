@@ -121,6 +121,24 @@ CREATE TABLE IF NOT EXISTS chat_inquiries (
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Blog posts table
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  excerpt TEXT,
+  content LONGTEXT NOT NULL,
+  category VARCHAR(100),
+  author VARCHAR(255) DEFAULT 'Admin',
+  featured_image VARCHAR(500),
+  published BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_slug (slug),
+  INDEX idx_category (category),
+  INDEX idx_published (published)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Insert sample products
 INSERT INTO products (name, description, price, image, category, stock, rating, num_reviews) VALUES
 ('Wireless Headphones', 'Premium noise-cancelling wireless headphones with 30-hour battery life', 129.99, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', 'Electronics', 50, 4.8, 245),
@@ -133,3 +151,11 @@ INSERT INTO products (name, description, price, image, category, stock, rating, 
 ('Desk Lamp', 'LED desk lamp with adjustable brightness and USB port', 44.99, 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500', 'Home & Living', 85, 4.6, 198),
 ('Sunglasses', 'Polarized UV protection sunglasses with designer frame', 119.99, 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500', 'Fashion', 45, 4.5, 123),
 ('Bluetooth Speaker', 'Portable waterproof speaker with 360° sound', 79.99, 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=500', 'Electronics', 55, 4.8, 389);
+
+-- Insert sample blog posts
+INSERT INTO blog_posts (title, slug, excerpt, content, category, author, featured_image, published) VALUES
+('Top 10 Fashion Trends for 2024', 'top-10-fashion-trends-2024', 'Discover the hottest fashion trends that will dominate this year', 'Stay ahead of the curve with our comprehensive guide to 2024 fashion trends. From vibrant colors to sustainable fabrics, we explore everything you need to know to upgrade your wardrobe this season.', 'Fashion', 'Sarah Johnson', 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500', TRUE),
+('Ultimate Guide to Smart Shopping', 'ultimate-guide-smart-shopping', 'Learn how to shop smarter and save more with these expert tips', 'Shopping doesn''t have to break the bank. In this guide, we share insider secrets on how to find the best deals, use coupons effectively, and make informed purchasing decisions that you won''t regret.', 'Shopping Tips', 'Michael Chen', 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=500', TRUE),
+('Best Tech Gadgets of the Season', 'best-tech-gadgets-season', 'Check out our top picks for must-have technology this season', 'Technology is evolving rapidly. We''ve rounded up the most innovative and useful tech gadgets that will make your life easier and more enjoyable. From smart home devices to portable chargers, these are the items worth investing in.', 'Technology', 'David Park', 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=500', TRUE),
+('Sustainable Living: Eco-Friendly Products', 'sustainable-living-eco-friendly-products', 'Make a positive impact with these environmentally conscious choices', 'Going green has never been easier. Explore our curated collection of eco-friendly products that help reduce your carbon footprint while maintaining quality and style. Small changes can make a big difference.', 'Lifestyle', 'Emma Wilson', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500', TRUE),
+('Wireless Headphones Buying Guide', 'wireless-headphones-buying-guide', 'Everything you need to know before buying wireless headphones', 'With so many options available, choosing the perfect wireless headphones can be overwhelming. Our comprehensive buying guide covers sound quality, battery life, comfort, and price points to help you make the right choice.', 'Product Reviews', 'Alex Turner', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500', TRUE);

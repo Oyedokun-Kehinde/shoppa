@@ -11,6 +11,7 @@ const wishlistRoutes = require('./routes/wishlist');
 const orderRoutes = require('./routes/orders');
 const newsletterRoutes = require('./routes/newsletter');
 const chatRoutes = require('./routes/chat');
+const blogRoutes = require('./routes/blog');
 
 // Load env vars
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/blog', blogRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

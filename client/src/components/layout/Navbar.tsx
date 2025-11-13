@@ -1,19 +1,32 @@
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, User, Menu, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Heart, User, Menu, X, Search } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useCartStore } from '../../store/cartStore';
 import { useWishlistStore } from '../../store/wishlistStore';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { isAuthenticated, user, logout } = useAuthStore();
   const { getTotalItems } = useCartStore();
   const wishlist = useWishlistStore((state) => state.items);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
+      setIsSearchOpen(false);
+    }
+  };
+
   const navigation = [
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/shop' },
+    { name: 'Blog', path: '/blog' },
     { name: 'About', path: '/about' },
     { name: 'FAQs', path: '/faqs' },
     { name: 'Contact', path: '/contact' },
@@ -43,6 +56,14 @@ const Navbar = () => {
 
           {/* Right Side Icons */}
           <div className="flex items-center space-x-6">
+            {/* Search Icon */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="text-dark hover:text-primary transition-colors"
+            >
+              <Search className="h-6 w-6" />
+            </button>
+
             {/* Wishlist Icon */}
             <Link to="/dashboard?tab=wishlist" className="relative">
               <Heart className="h-6 w-6 text-dark hover:text-primary transition-colors" />
@@ -185,6 +206,32 @@ const Navbar = () => {
                   )}
                 </div>
               </nav>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Search Modal */}
+      {isSearchOpen && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/50 z-[60] animate-fade-in"
+            onClick={() => setIsSearchOpen(false)}
+          />
+          <div className="absolute top-full left-0 right-0 bg-white shadow-2xl z-[70] border-t animate-fade-in">
+            <div className="max-w-3xl mx-auto px-4 py-6">
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for products..."
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-lg"
+                  autoFocus
+                />
+              </form>
+              <p className="text-sm text-gray-500 mt-3">Press Enter to search</p>
             </div>
           </div>
         </>
