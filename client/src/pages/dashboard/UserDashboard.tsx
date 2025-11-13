@@ -33,6 +33,8 @@ const UserDashboard = () => {
     try {
       setLoading(true);
       const response = await api.get('/orders/myorders');
+      console.log('📦 Orders fetched:', response.data);
+      console.log('📊 First order sample:', response.data[0]);
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -74,12 +76,24 @@ const UserDashboard = () => {
 
   // Calculate total spent from PAID orders only, using correct database field names
   const totalSpent = orders.reduce((sum: number, o: any) => {
+    console.log('Order:', {
+      id: o.id || o._id,
+      is_paid: o.is_paid,
+      total_price: o.total_price,
+      totalPrice: o.totalPrice
+    });
+    
     // Only count paid orders
     if (o.is_paid) {
-      return sum + (o.total_price || o.totalPrice || 0);
+      const amount = o.total_price || o.totalPrice || 0;
+      console.log('✅ Adding paid order:', amount);
+      return sum + amount;
     }
+    console.log('❌ Skipping unpaid order');
     return sum;
   }, 0);
+  
+  console.log('💰 Total Spent:', totalSpent);
   
   const stats = [
     { icon: <Package className="h-8 w-8" />, label: 'Total Orders', value: orders.length.toString(), color: 'bg-blue-50 text-blue-600' },

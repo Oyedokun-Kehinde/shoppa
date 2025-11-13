@@ -190,11 +190,20 @@ router.post('/paystack/verify', protect, async (req, res) => {
     if (data.status === 'success') {
       console.log('✅ Payment status is SUCCESS');
       
-      const pool = getPool();
-      const orderId = data.metadata?.orderId || data.metadata?.order_id || data.metadata?.custom_fields?.find(f => f.variable_name === 'order_id')?.value;
+      let orderId = data.metadata?.orderId || data.metadata?.order_id;
+      
+      // Check custom_fields if orderId not found
+      if (!orderId && data.metadata?.custom_fields && Array.isArray(data.metadata.custom_fields)) {
+        const orderField = data.metadata.custom_fields.find(f => f.variable_name === 'order_id');
+        if (orderField) {
+          orderId = orderField.value;
+        }
+      }
       
       console.log('🔑 Order ID from metadata:', orderId);
       console.log('📦 Full metadata:', JSON.stringify(data.metadata, null, 2));
+      
+      const pool = getPool();
       
       if (!orderId) {
         console.error('❌ Order ID not found in metadata');

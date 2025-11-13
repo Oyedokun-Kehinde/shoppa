@@ -233,14 +233,29 @@ router.post('/:id/reaction', optionalAuth, async (req, res) => {
 
 // @route   GET /api/blog/:id/reaction
 // @desc    Get user's reaction to blog post
-// @access  Private
-router.get('/:id/reaction', protect, async (req, res) => {
+// @access  Public (optional auth)
+router.get('/:id/reaction', optionalAuth, async (req, res) => {
   try {
     const pool = getPool();
-    const [reactions] = await pool.query(
-      'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = ? AND user_id = ?',
-      [req.params.id, req.user.id]
-    );
+    const userId = req.user?.id;
+    const session_id = req.body.session_id || req.headers['x-session-id'];
+
+    if (!userId && !session_id) {
+      return res.json({ reaction: null });
+    }
+
+    let reactions;
+    if (userId) {
+      [reactions] = await pool.query(
+        'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = ? AND user_id = ?',
+        [req.params.id, userId]
+      );
+    } else {
+      [reactions] = await pool.query(
+        'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = ? AND session_id = ?',
+        [req.params.id, session_id]
+      );
+    }
 
     if (reactions.length > 0) {
       res.json({ reaction: reactions[0].reaction_type });
