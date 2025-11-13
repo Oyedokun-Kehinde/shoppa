@@ -335,7 +335,7 @@ const Shop = () => {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-2xl font-bold text-primary">${product.price}</p>
+                      <p className="text-2xl font-bold text-primary">₦{product.price.toLocaleString()}</p>
                       <button
                         onClick={() => handleAddToCart(product)}
                         className="bg-dark text-white p-2.5 rounded-lg hover:bg-dark-light transition-colors"

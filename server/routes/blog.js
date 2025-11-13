@@ -98,4 +98,150 @@ router.post(
   }
 );
 
+// @route   GET /api/blog/:id/comments
+// @desc    Get blog post comments
+// @access  Public
+router.get('/:id/comments', async (req, res) => {
+  try {
+    const pool = getPool();
+    const [comments] = await pool.query(
+      `SELECT bc.*, u.name as user_name 
+       FROM blog_comments bc 
+       JOIN users u ON bc.user_id = u.id 
+       WHERE bc.blog_post_id = ? 
+       ORDER BY bc.created_at DESC`,
+      [req.params.id]
+    );
+
+    res.json(comments);
+  } catch (error) {
+    console.error('Get comments error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   POST /api/blog/:id/comments
+// @desc    Add a comment to blog post
+// @access  Private
+router.post('/:id/comments', protect, async (req, res) => {
+  try {
+    const { comment } = req.body;
+    if (!comment || !comment.trim()) {
+      return res.status(400).json({ message: 'Comment is required' });
+    }
+
+    const pool = getPool();
+
+    await pool.query(
+      'INSERT INTO blog_comments (blog_post_id, user_id, comment) VALUES (?, ?, ?)',
+      [req.params.id, req.user.id, comment]
+    );
+
+    // Update comments count
+    await pool.query(
+      `UPDATE blog_posts 
+       SET comments_count = (SELECT COUNT(*) FROM blog_comments WHERE blog_post_id = ?) 
+       WHERE id = ?`,
+      [req.params.id, req.params.id]
+    );
+
+    res.status(201).json({ message: 'Comment added successfully' });
+  } catch (error) {
+    console.error('Add comment error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   POST /api/blog/:id/reaction
+// @desc    Add/update reaction to blog post (logged in or anonymous)
+// @access  Public
+router.post('/:id/reaction', async (req, res) => {
+  try {
+    const { reaction_type, session_id } = req.body;
+    const pool = getPool();
+    const userId = req.user ? req.user.id : null;
+
+    // Validate reaction type
+    const validReactions = ['like', 'love', 'insightful', 'celebrate'];
+    if (!validReactions.includes(reaction_type)) {
+      return res.status(400).json({ message: 'Invalid reaction type' });
+    }
+
+    // Check if user/session already reacted
+    let existingReaction;
+    if (userId) {
+      [existingReaction] = await pool.query(
+        'SELECT * FROM blog_reactions WHERE blog_post_id = ? AND user_id = ?',
+        [req.params.id, userId]
+      );
+    } else if (session_id) {
+      [existingReaction] = await pool.query(
+        'SELECT * FROM blog_reactions WHERE blog_post_id = ? AND session_id = ?',
+        [req.params.id, session_id]
+      );
+    } else {
+      return res.status(400).json({ message: 'User ID or session ID required' });
+    }
+
+    if (existingReaction.length > 0) {
+      // Update existing reaction
+      await pool.query(
+        'UPDATE blog_reactions SET reaction_type = ? WHERE id = ?',
+        [reaction_type, existingReaction[0].id]
+      );
+    } else {
+      // Insert new reaction
+      await pool.query(
+        'INSERT INTO blog_reactions (blog_post_id, user_id, session_id, reaction_type) VALUES (?, ?, ?, ?)',
+        [req.params.id, userId, session_id, reaction_type]
+      );
+    }
+
+    // Update reaction counts
+    const [reactions] = await pool.query(
+      `SELECT 
+        SUM(CASE WHEN reaction_type = 'like' THEN 1 ELSE 0 END) as likes,
+        SUM(CASE WHEN reaction_type = 'love' THEN 1 ELSE 0 END) as loves,
+        SUM(CASE WHEN reaction_type = 'insightful' THEN 1 ELSE 0 END) as insightful,
+        SUM(CASE WHEN reaction_type = 'celebrate' THEN 1 ELSE 0 END) as celebrate
+       FROM blog_reactions WHERE blog_post_id = ?`,
+      [req.params.id]
+    );
+
+    await pool.query(
+      `UPDATE blog_posts 
+       SET likes_count = ?, loves_count = ?, insightful_count = ?, celebrate_count = ? 
+       WHERE id = ?`,
+      [reactions[0].likes, reactions[0].loves, reactions[0].insightful, reactions[0].celebrate, req.params.id]
+    );
+
+    res.json({ message: 'Reaction added successfully' });
+  } catch (error) {
+    console.error('Add reaction error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   GET /api/blog/:id/reaction
+// @desc    Get user's reaction to blog post
+// @access  Private
+router.get('/:id/reaction', protect, async (req, res) => {
+  try {
+    const pool = getPool();
+    const [reactions] = await pool.query(
+      'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+
+    if (reactions.length > 0) {
+      res.json({ reaction: reactions[0].reaction_type });
+    } else {
+      res.json({ reaction: null });
+    }
+  } catch (error) {
+    console.error('Get reaction error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

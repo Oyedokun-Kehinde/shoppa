@@ -35,8 +35,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @route   GET /api/products/slug/:slug
+// @desc    Get product by slug
+// @access  Public
+router.get('/slug/:slug', async (req, res) => {
+  try {
+    const pool = getPool();
+    const [products] = await pool.query(
+      'SELECT * FROM products WHERE slug = ?',
+      [req.params.slug]
+    );
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.json(products[0]);
+  } catch (error) {
+    console.error('Get product by slug error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // @route   GET /api/products/:id
-// @desc    Get single product
+// @desc    Get single product by ID
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
@@ -53,6 +75,70 @@ router.get('/:id', async (req, res) => {
     res.json(products[0]);
   } catch (error) {
     console.error('Get product error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   GET /api/products/:id/reviews
+// @desc    Get product reviews
+// @access  Public
+router.get('/:id/reviews', async (req, res) => {
+  try {
+    const pool = getPool();
+    const [reviews] = await pool.query(
+      `SELECT pr.*, u.name as user_name 
+       FROM product_reviews pr 
+       JOIN users u ON pr.user_id = u.id 
+       WHERE pr.product_id = ? 
+       ORDER BY pr.created_at DESC`,
+      [req.params.id]
+    );
+
+    res.json(reviews);
+  } catch (error) {
+    console.error('Get reviews error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   POST /api/products/:id/reviews
+// @desc    Create product review
+// @access  Private
+router.post('/:id/reviews', protect, async (req, res) => {
+  try {
+    const { rating, title, comment } = req.body;
+    const pool = getPool();
+
+    // Check if user already reviewed this product
+    const [existing] = await pool.query(
+      'SELECT id FROM product_reviews WHERE product_id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'You have already reviewed this product' });
+    }
+
+    // Insert review
+    await pool.query(
+      'INSERT INTO product_reviews (product_id, user_id, rating, title, comment) VALUES (?, ?, ?, ?, ?)',
+      [req.params.id, req.user.id, rating, title, comment]
+    );
+
+    // Update product rating
+    const [reviews] = await pool.query(
+      'SELECT AVG(rating) as avg_rating, COUNT(*) as count FROM product_reviews WHERE product_id = ?',
+      [req.params.id]
+    );
+
+    await pool.query(
+      'UPDATE products SET rating = ?, num_reviews = ? WHERE id = ?',
+      [reviews[0].avg_rating, reviews[0].count, req.params.id]
+    );
+
+    res.status(201).json({ message: 'Review added successfully' });
+  } catch (error) {
+    console.error('Create review error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
