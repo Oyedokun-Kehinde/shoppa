@@ -137,24 +137,24 @@ const Home = () => {
 
   const testimonials = [
     {
-      name: 'Sarah Johnson',
-      role: 'Fashion Enthusiast',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-      content: 'Shoppa has completely transformed my shopping experience. The quality of products is exceptional, and the customer service is outstanding!',
-      rating: 5,
-    },
-    {
-      name: 'Michael Chen',
-      role: 'Tech Professional',
+      name: 'Adewale Ogunleye',
+      role: 'Fashion Enthusiast, Akure',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-      content: 'I love the variety and quality of electronics available. Fast shipping and great prices make this my go-to store for all tech purchases.',
+      content: 'Shoppa has completely transformed my shopping experience. The quality of products is exceptional, and the customer service is outstanding! Delivery to Akure was super fast.',
       rating: 5,
     },
     {
-      name: 'Emily Rodriguez',
-      role: 'Home Decorator',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
-      content: 'The home decor collection is stunning! I\'ve furnished my entire apartment with items from Shoppa. Highly recommend to everyone!',
+      name: 'Funmilayo Adeyemi',
+      role: 'Tech Professional, Ondo State',
+      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+      content: 'I love the variety and quality of electronics available. Fast shipping to Akure and great prices make this my go-to store for all tech purchases.',
+      rating: 5,
+    },
+    {
+      name: 'Oluwaseun Babatunde',
+      role: 'Business Owner, Akure',
+      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+      content: 'The product range is amazing! I\'ve equipped my entire office with items from Shoppa. Highly recommend to everyone in Akure and beyond!',
       rating: 5,
     },
   ];
