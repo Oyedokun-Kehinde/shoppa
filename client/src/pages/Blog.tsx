@@ -152,12 +152,20 @@ const Blog = () => {
                         
                         <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
                           <span className="flex items-center space-x-1">
+                            <Tag className="h-4 w-4" />
+                            <span>{post.category}</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
                             <User className="h-4 w-4" />
                             <span>{post.author}</span>
                           </span>
                           <span className="flex items-center space-x-1">
                             <Calendar className="h-4 w-4" />
                             <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <MessageSquare className="h-4 w-4" />
+                            <span>{(post.likes_count || 0) + (post.loves_count || 0) + (post.insightful_count || 0) + (post.celebrate_count || 0)} reactions</span>
                           </span>
                         </div>
 

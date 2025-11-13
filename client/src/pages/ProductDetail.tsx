@@ -58,6 +58,7 @@ const ProductDetail = () => {
   });
 
   useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to top when product changes
     fetchProductDetails();
   }, [slug]);
 
@@ -151,6 +152,29 @@ const ProductDetail = () => {
       fetchProductDetails();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to submit review');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    
+    const shareData = {
+      title: product.name,
+      text: `Check out ${product.name} on Shoppa!`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success('Shared successfully!');
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
     }
   };
 
@@ -286,7 +310,11 @@ const ProductDetail = () => {
                 >
                   <Heart className={`h-6 w-6 ${isInWishlist ? 'fill-current' : ''}`} />
                 </button>
-                <button className="w-16 h-16 rounded-lg border-2 border-gray-300 flex items-center justify-center hover:border-primary transition-colors">
+                <button 
+                  onClick={handleShare}
+                  className="w-16 h-16 rounded-lg border-2 border-gray-300 flex items-center justify-center hover:border-primary transition-colors"
+                  title="Share this product"
+                >
                   <Share2 className="h-6 w-6" />
                 </button>
               </div>

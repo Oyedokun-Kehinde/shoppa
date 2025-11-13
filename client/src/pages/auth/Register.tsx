@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
@@ -8,11 +8,22 @@ import api from '../../lib/api';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login, user, isAuthenticated } = useAuthStore();
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const password = watch('password');
+
+  // Check if user is already logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      toast.success(`You're already logged in as ${user.name}!`, {
+        icon: '👋',
+        duration: 4000
+      });
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const getPasswordStrength = (password: string) => {
     if (!password) return { strength: '', color: '', text: '' };
