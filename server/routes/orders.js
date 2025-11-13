@@ -226,15 +226,29 @@ router.post('/paystack/verify', protect, async (req, res) => {
       }
 
       console.log('📝 Updating order as paid...');
+      console.log('📝 Order ID to update:', orderId, 'Type:', typeof orderId);
+      console.log('📝 User ID:', req.user.id);
+      
+      // Convert orderId to number if it's a string
+      const orderIdNumber = typeof orderId === 'string' ? parseInt(orderId, 10) : orderId;
+      
+      console.log('📝 Converted Order ID:', orderIdNumber, 'Type:', typeof orderIdNumber);
       
       // Update order as paid
       const [updateResult] = await pool.query(
         `UPDATE orders SET is_paid = 1, paid_at = NOW(), payment_result = ? WHERE id = ?`,
-        [JSON.stringify(data), orderId]
+        [JSON.stringify(data), orderIdNumber]
       );
 
       console.log('✅ Order update result:', updateResult);
-      console.log('✅ Order', orderId, 'marked as PAID successfully');
+      console.log('✅ Affected rows:', updateResult.affectedRows);
+      console.log('✅ Changed rows:', updateResult.changedRows);
+      
+      if (updateResult.affectedRows === 0) {
+        console.error('⚠️ WARNING: No rows were updated! Order may not exist or is already paid.');
+      } else {
+        console.log('✅ Order', orderIdNumber, 'marked as PAID successfully');
+      }
       console.log('========================================');
 
       res.json({ 
@@ -268,6 +282,43 @@ router.post('/paystack/verify', protect, async (req, res) => {
       message: 'Payment verification failed due to server error', 
       error: error.response?.data?.message || error.message 
     });
+  }
+});
+
+// @route   PATCH /api/orders/:id/mark-paid
+// @desc    Manually mark order as paid (for testing/admin)
+// @access  Private
+router.patch('/:id/mark-paid', protect, async (req, res) => {
+  try {
+    const pool = getPool();
+    
+    console.log('🔧 Manually marking order as paid:', req.params.id);
+    
+    // Check if order exists and belongs to user
+    const [existingOrders] = await pool.query(
+      'SELECT * FROM orders WHERE id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+
+    if (existingOrders.length === 0) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Update order as paid
+    await pool.query(
+      `UPDATE orders SET is_paid = 1, paid_at = NOW() WHERE id = ?`,
+      [req.params.id]
+    );
+
+    console.log('✅ Order', req.params.id, 'manually marked as PAID');
+
+    res.json({ 
+      message: 'Order marked as paid successfully',
+      orderId: req.params.id
+    });
+  } catch (error) {
+    console.error('Mark paid error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
