@@ -1,14 +1,50 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, Truck, Shield, Headphones, Star, Quote, TrendingUp, Award, Package } from 'lucide-react';
-import HeroCarousel from '../components/HeroCarousel';
-import AnimatedCounter from '../components/AnimatedCounter';
-import toast from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Star, ShoppingBag, Package, Headphones, TrendingUp, Quote, ShoppingCart, Heart, Truck, Shield, Award } from 'lucide-react';
+import { useCartStore } from '../store/cartStore';
+import { useWishlistStore } from '../store/wishlistStore';
+import { useAuthStore } from '../store/authStore';
 import api from '../lib/api';
+import toast from 'react-hot-toast';
+import AnimatedCounter from '../components/AnimatedCounter';
+import HeroCarousel from '../components/HeroCarousel';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribing, setSubscribing] = useState(false);
+  const { addItem } = useCartStore();
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
+  const { isAuthenticated } = useAuthStore();
+
+  const handleAddToCart = (product: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error('Please login to add items to cart');
+      navigate('/login');
+      return;
+    }
+    addItem(product);
+    toast.success('Added to cart!');
+  };
+
+  const toggleWishlist = (product: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error('Please login to add items to wishlist');
+      navigate('/login');
+      return;
+    }
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+      toast.success('Removed from wishlist');
+    } else {
+      addToWishlist({ _id: product.id, product, addedAt: new Date().toISOString() });
+      toast.success('Added to wishlist!');
+    }
+  };
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,34 +69,42 @@ const Home = () => {
     {
       id: '1',
       name: 'Premium Wireless Headphones',
+      slug: 'premium-wireless-headphones',
       price: 299.99,
       image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
       category: 'Electronics',
       rating: 4.8,
+      stock: 50,
     },
     {
       id: '2',
       name: 'Designer Leather Bag',
+      slug: 'designer-leather-bag',
       price: 189.99,
       image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500',
       category: 'Fashion',
       rating: 4.7,
+      stock: 30,
     },
     {
       id: '3',
       name: 'Smart Watch Pro',
+      slug: 'smart-watch-pro',
       price: 399.99,
       image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
       category: 'Electronics',
       rating: 4.9,
+      stock: 25,
     },
     {
       id: '4',
       name: 'Athletic Sneakers',
+      slug: 'athletic-sneakers',
       price: 129.99,
       image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500',
       category: 'Fashion',
       rating: 4.6,
+      stock: 60,
     },
   ];
 
@@ -199,35 +243,55 @@ const Home = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredProducts.map((product) => (
-              <Link
+              <div
                 key={product.id}
-                to={`/product/${product.id}`}
-                className="card overflow-hidden group hover:shadow-xl transition-all duration-300"
+                className="card overflow-hidden group hover:shadow-xl transition-all duration-300 relative"
               >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                    New
-                  </div>
-                </div>
-                <div className="p-6">
-                  <p className="text-sm text-gray-500 mb-2">{product.category}</p>
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-                    {product.name}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-primary">${product.price}</p>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-semibold">{product.rating}</span>
+                <Link to={`/product/${product.slug}`} className="block">
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+                      New
+                    </div>
+                    {/* Quick Action Icons */}
+                    <div className="absolute top-4 left-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <button
+                        onClick={(e) => handleAddToCart(product, e)}
+                        className="bg-white p-2 rounded-full shadow-lg hover:bg-primary hover:text-white transition-all"
+                        title="Add to Cart"
+                      >
+                        <ShoppingCart className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={(e) => toggleWishlist(product, e)}
+                        className={`bg-white p-2 rounded-full shadow-lg hover:bg-red-500 hover:text-white transition-all ${
+                          isInWishlist(product.id) ? 'bg-red-500 text-white' : ''
+                        }`}
+                        title={isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                      >
+                        <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                      </button>
                     </div>
                   </div>
-                </div>
-              </Link>
+                  <div className="p-6">
+                    <p className="text-sm text-gray-500 mb-2">{product.category}</p>
+                    <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <p className="text-2xl font-bold text-primary">${product.price}</p>
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-semibold">{product.rating}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
             ))}
           </div>
 
