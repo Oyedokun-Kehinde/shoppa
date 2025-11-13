@@ -1,4 +1,5 @@
 import { Target, Users, TrendingUp, Award, Linkedin, Twitter, Mail } from 'lucide-react';
+import PageHero from '../components/PageHero';
 
 const About = () => {
   const stats = [
@@ -107,20 +108,12 @@ const About = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-dark via-dark-light to-dark text-white py-24 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-            backgroundSize: '50px 50px'
-          }}></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">About Shoppa</h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto animate-fade-in-delay">
-            We're on a mission to revolutionize online shopping by providing premium products with exceptional service
-          </p>
-        </div>
-      </section>
+      <PageHero
+        title="About Shoppa"
+        subtitle="We're on a mission to revolutionize online shopping by providing premium products with exceptional service"
+        breadcrumbs={[{ label: 'About Us' }]}
+        bgImage="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200"
+      />
 
       {/* Story Section */}
       <section className="py-24">
@@ -209,23 +202,23 @@ const About = () => {
       </section>
 
       {/* Our Commitment Section */}
-      <section className="py-24 bg-gradient-to-r from-dark via-gray-900 to-dark text-white">
+      <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Commitment to You</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold text-dark mb-4">Our Commitment to You</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               We pledge to uphold the highest standards in every aspect of our business
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Commitment 1 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+            <div className="card p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-primary">
               <div className="bg-primary/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                 <Users className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Customer-Centric Service</h3>
-              <p className="text-gray-300 leading-relaxed">
+              <h3 className="text-2xl font-bold text-dark mb-4">Customer-Centric Service</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Your satisfaction is our priority. We guarantee responsive customer support, 
                 easy returns, and a shopping experience that exceeds your expectations. From Akure 
                 to every corner of Nigeria, we're here for you 24/7.
@@ -233,12 +226,12 @@ const About = () => {
             </div>
 
             {/* Commitment 2 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+            <div className="card p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-green-500">
               <div className="bg-green-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                <Award className="h-8 w-8 text-green-400" />
+                <Award className="h-8 w-8 text-green-600" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Quality Assurance</h3>
-              <p className="text-gray-300 leading-relaxed">
+              <h3 className="text-2xl font-bold text-dark mb-4">Quality Assurance</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Every product is carefully vetted for authenticity and quality. We work directly with 
                 trusted manufacturers and suppliers to ensure you receive only genuine, high-quality items 
                 that meet international standards.
@@ -246,12 +239,12 @@ const About = () => {
             </div>
 
             {/* Commitment 3 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+            <div className="card p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-blue-600">
               <div className="bg-blue-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                <TrendingUp className="h-8 w-8 text-blue-400" />
+                <TrendingUp className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Continuous Innovation</h3>
-              <p className="text-gray-300 leading-relaxed">
+              <h3 className="text-2xl font-bold text-dark mb-4">Continuous Innovation</h3>
+              <p className="text-gray-600 leading-relaxed">
                 We embrace technology and innovation to improve your shopping experience. From AI-powered 
                 recommendations to seamless payment options, we're constantly evolving to serve you better 
                 and make online shopping effortless.
@@ -259,12 +252,12 @@ const About = () => {
             </div>
 
             {/* Commitment 4 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+            <div className="card p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-yellow-500">
               <div className="bg-yellow-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                <Target className="h-8 w-8 text-yellow-400" />
+                <Target className="h-8 w-8 text-yellow-600" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Fast & Reliable Delivery</h3>
-              <p className="text-gray-300 leading-relaxed">
+              <h3 className="text-2xl font-bold text-dark mb-4">Fast & Reliable Delivery</h3>
+              <p className="text-gray-600 leading-relaxed">
                 We understand the importance of timely delivery. Our logistics network ensures your orders 
                 reach you quickly and safely, whether you're in Akure, Lagos, or any part of Nigeria. 
                 Track every step of your order in real-time.
@@ -272,12 +265,12 @@ const About = () => {
             </div>
 
             {/* Commitment 5 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+            <div className="card p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-purple-600">
               <div className="bg-purple-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                <Award className="h-8 w-8 text-purple-400" />
+                <Award className="h-8 w-8 text-purple-600" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Competitive Pricing</h3>
-              <p className="text-gray-300 leading-relaxed">
+              <h3 className="text-2xl font-bold text-dark mb-4">Competitive Pricing</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Premium quality shouldn't mean premium prices. We negotiate the best deals with suppliers 
                 and pass the savings to you. Enjoy authentic products at prices that respect your budget, 
                 with regular discounts and promotions.
@@ -285,12 +278,12 @@ const About = () => {
             </div>
 
             {/* Commitment 6 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 hover:bg-white/15 transition-all duration-300">
+            <div className="card p-8 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-red-600">
               <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                <Users className="h-8 w-8 text-red-400" />
+                <Users className="h-8 w-8 text-red-600" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Community Building</h3>
-              <p className="text-gray-300 leading-relaxed">
+              <h3 className="text-2xl font-bold text-dark mb-4">Community Building</h3>
+              <p className="text-gray-600 leading-relaxed">
                 We're more than a store—we're a community. By supporting Shoppa, you're supporting local 
                 Nigerian businesses, jobs, and economic growth. Together, we're building a stronger, 
                 more connected Nigeria.

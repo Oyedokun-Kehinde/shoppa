@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
+import PageHero from '../components/PageHero';
 
 const Contact = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
@@ -19,12 +20,12 @@ const Contact = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-dark via-dark-light to-dark text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl text-gray-300">We'd love to hear from you</p>
-        </div>
-      </section>
+      <PageHero
+        title="Contact Us"
+        subtitle="We'd love to hear from you. Get in touch with our team."
+        breadcrumbs={[{ label: 'Contact' }]}
+        bgImage="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1200"
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-2 gap-12">

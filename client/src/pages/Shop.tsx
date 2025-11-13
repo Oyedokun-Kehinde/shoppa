@@ -6,6 +6,7 @@ import { useWishlistStore } from '../store/wishlistStore';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
+import PageHero from '../components/PageHero';
 
 const Shop = () => {
   const navigate = useNavigate();
@@ -116,16 +117,23 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-dark via-dark-light to-dark text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Shop</h1>
-          <p className="text-xl text-gray-300">Discover our complete collection of premium products</p>
-          <div className="mt-6 flex items-center justify-center space-x-4 text-sm">
-            <span className="bg-white/20 px-4 py-2 rounded-full">{filteredProducts.length} Products</span>
-            <span className="bg-white/20 px-4 py-2 rounded-full">{categories.length - 1} Categories</span>
+      <PageHero
+        title="Shop"
+        subtitle="Discover our complete collection of premium products"
+        breadcrumbs={[{ label: 'Shop' }]}
+        bgImage="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200"
+      />
+
+      {/* Stats */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-center space-x-6 text-sm">
+            <span className="text-gray-700 font-semibold">📦 {filteredProducts.length} Products</span>
+            <span className="text-gray-300">|</span>
+            <span className="text-gray-700 font-semibold">🏷️ {categories.length - 1} Categories</span>
           </div>
         </div>
-      </section>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col lg:flex-row gap-8">

@@ -18,6 +18,7 @@ import Checkout from './pages/Checkout';
 import Contact from './pages/Contact';
 import FAQs from './pages/FAQs';
 import Cart from './pages/Cart';
+import HowItWorks from './pages/HowItWorks';
 
 // Policy Pages
 import PrivacyPolicy from './pages/policies/PrivacyPolicy';
@@ -70,6 +71,7 @@ function App() {
             <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faqs" element={<FAQs />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             

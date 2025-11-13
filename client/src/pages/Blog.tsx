@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight, Search, Tag, TrendingUp, Clock, MessageSquare } from 'lucide-react';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
+import PageHero from '../components/PageHero';
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);
@@ -88,14 +89,12 @@ const Blog = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary to-primary-dark text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-4">Our Blog</h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Stay updated with the latest trends, tips, and stories from the world of e-commerce
-          </p>
-        </div>
-      </div>
+      <PageHero
+        title="Our Blog"
+        subtitle="Stay updated with the latest trends, tips, and stories from the world of e-commerce"
+        breadcrumbs={[{ label: 'Blog' }]}
+        bgImage="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1200"
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
