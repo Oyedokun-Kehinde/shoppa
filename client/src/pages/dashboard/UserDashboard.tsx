@@ -176,18 +176,18 @@ const UserDashboard = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {wishlistItems.slice(0, 4).map((item: any) => (
                         <Link
-                          key={item._id}
-                          to={`/product/${item.product._id}`}
+                          key={item.id}
+                          to={`/shop`}
                           className="card overflow-hidden hover:shadow-lg transition-shadow"
                         >
                           <img
-                            src={item.product.image}
-                            alt={item.product.name}
+                            src={item.image}
+                            alt={item.name}
                             className="w-full h-32 object-cover"
                           />
                           <div className="p-3">
-                            <h3 className="font-semibold text-sm line-clamp-1">{item.product.name}</h3>
-                            <p className="text-primary font-bold">${item.product.price}</p>
+                            <h3 className="font-semibold text-sm line-clamp-1">{item.name}</h3>
+                            <p className="text-primary font-bold">₦{item.price.toLocaleString()}</p>
                           </div>
                         </Link>
                       ))}
@@ -295,19 +295,18 @@ const UserDashboard = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {wishlistItems.map((item: any) => (
                       <Link
-                        key={item._id}
-                        to={`/product/${item.product._id}`}
+                        key={item.id}
+                        to={`/shop`}
                         className="card overflow-hidden hover:shadow-lg transition-shadow"
                       >
                         <img
-                          src={item.product.image}
-                          alt={item.product.name}
+                          src={item.image}
+                          alt={item.name}
                           className="w-full h-48 object-cover"
                         />
                         <div className="p-4">
-                          <p className="text-sm text-gray-500 mb-1">{item.product.category}</p>
-                          <h3 className="font-semibold mb-2">{item.product.name}</h3>
-                          <p className="text-2xl font-bold text-primary">₦{item.product.price.toLocaleString()}</p>
+                          <h3 className="font-semibold mb-2">{item.name}</h3>
+                          <p className="text-2xl font-bold text-primary">₦{item.price.toLocaleString()}</p>
                         </div>
                       </Link>
                     ))}

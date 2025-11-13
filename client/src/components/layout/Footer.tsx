@@ -40,6 +40,16 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/how-it-works" className="text-gray-400 hover:text-primary transition-colors">
+                  How It Works
+                </Link>
+              </li>
+              <li>
+                <Link to="/blog" className="text-gray-400 hover:text-primary transition-colors">
+                  Blog
+                </Link>
+              </li>
+              <li>
                 <Link to="/faqs" className="text-gray-400 hover:text-primary transition-colors">
                   FAQs
                 </Link>
@@ -85,15 +95,15 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-gray-400">
                 <Mail className="h-5 w-5 text-primary" />
-                <span>support@shoppa.com</span>
+                <span>support@shoppa.ng</span>
               </li>
               <li className="flex items-center space-x-2 text-gray-400">
                 <Phone className="h-5 w-5 text-primary" />
-                <span>+1 (555) 123-4567</span>
+                <span>+234 803 123 4567</span>
               </li>
-              <li className="flex items-center space-x-2 text-gray-400">
-                <MapPin className="h-5 w-5 text-primary" />
-                <span>123 Shop Street, NY 10001</span>
+              <li className="flex items-start space-x-2 text-gray-400">
+                <MapPin className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                <span>123 Alagbaka Road, Akure, Ondo State, Nigeria</span>
               </li>
             </ul>
           </div>
