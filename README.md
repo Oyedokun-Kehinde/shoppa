@@ -1,6 +1,6 @@
-# Shoppa - Premium E-Commerce Platform
+# 🛍️ Shoppa - Premium Nigerian E-Commerce Platform
 
-A full-stack e-commerce application built with React and Node.js, featuring user authentication, product management, shopping cart, and email notifications.
+A modern, full-stack e-commerce platform built with React, TypeScript, Node.js, and MySQL. Features include Paystack payment integration, real-time blog reactions, wishlist management, order tracking, and comprehensive admin controls.
 
 ## 🎨 Design
 

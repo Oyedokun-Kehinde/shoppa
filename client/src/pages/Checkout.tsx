@@ -142,21 +142,36 @@ const Checkout = () => {
         },
         callback: function(response: any) {
           console.log('Payment callback received:', response);
+          console.log('Payment reference:', response.reference);
+          
           // Handle verification asynchronously but callback itself is sync
           api.post('/orders/paystack/verify', {
             reference: response.reference,
           })
           .then((verifyResponse) => {
-            console.log('Payment verified:', verifyResponse.data);
-            toast.success('Payment successful! 🎉');
+            console.log('✅ Payment verified successfully:', verifyResponse.data);
+            toast.success('Payment successful! 🎉', {
+              duration: 5000,
+              icon: '✅'
+            });
             clearCart();
-            navigate(`/orders/${order._id || order.id}`);
+            setProcessing(false);
+            // Navigate after a short delay to show success message
+            setTimeout(() => {
+              navigate(`/orders/${order._id || order.id}`);
+            }, 1000);
           })
           .catch((error: any) => {
-            console.error('Payment verification failed:', error);
-            toast.error(error.response?.data?.message || 'Payment verification failed');
-          })
-          .finally(() => {
+            console.error('❌ Payment verification error:', error);
+            console.error('Error response:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            
+            // Only show error if it's not a network issue during navigation
+            if (error.response?.status !== 404) {
+              toast.error(error.response?.data?.message || 'Payment verification failed. Please contact support.', {
+                duration: 6000
+              });
+            }
             setProcessing(false);
           });
         },

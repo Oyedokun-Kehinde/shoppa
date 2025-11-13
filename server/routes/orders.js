@@ -161,13 +161,18 @@ router.post('/paystack/verify', protect, async (req, res) => {
   try {
     const { reference } = req.body;
     
-    console.log('Verifying payment with reference:', reference);
+    console.log('========================================');
+    console.log('🔍 Verifying payment with reference:', reference);
+    console.log('User ID:', req.user.id);
+    console.log('========================================');
     
     if (!reference) {
+      console.error('❌ No reference provided');
       return res.status(400).json({ message: 'Payment reference is required' });
     }
     
     // Verify payment with Paystack
+    console.log('📡 Calling Paystack API...');
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -177,41 +182,81 @@ router.post('/paystack/verify', protect, async (req, res) => {
       }
     );
 
-    console.log('Paystack verification response:', response.data);
+    console.log('📥 Paystack API response status:', response.data.status);
+    console.log('📥 Paystack API response:', JSON.stringify(response.data, null, 2));
+    
     const { data } = response.data;
     
     if (data.status === 'success') {
-      const pool = getPool();
-      const orderId = data.metadata?.orderId || data.metadata?.order_id;
+      console.log('✅ Payment status is SUCCESS');
       
-      console.log('Payment successful, updating order:', orderId);
+      const pool = getPool();
+      const orderId = data.metadata?.orderId || data.metadata?.order_id || data.metadata?.custom_fields?.find(f => f.variable_name === 'order_id')?.value;
+      
+      console.log('🔑 Order ID from metadata:', orderId);
+      console.log('📦 Full metadata:', JSON.stringify(data.metadata, null, 2));
       
       if (!orderId) {
-        console.error('Order ID not found in metadata:', data.metadata);
-        return res.status(400).json({ message: 'Order ID not found in payment metadata' });
+        console.error('❌ Order ID not found in metadata');
+        console.error('Available metadata:', data.metadata);
+        return res.status(400).json({ 
+          message: 'Order ID not found in payment metadata',
+          metadata: data.metadata 
+        });
       }
       
+      // Check if order exists and belongs to user
+      const [existingOrders] = await pool.query(
+        'SELECT * FROM orders WHERE id = ? AND user_id = ?',
+        [orderId, req.user.id]
+      );
+
+      if (existingOrders.length === 0) {
+        console.error('❌ Order not found or does not belong to user');
+        return res.status(404).json({ message: 'Order not found' });
+      }
+
+      console.log('📝 Updating order as paid...');
+      
       // Update order as paid
-      await pool.query(
+      const [updateResult] = await pool.query(
         `UPDATE orders SET is_paid = 1, paid_at = NOW(), payment_result = ? WHERE id = ?`,
         [JSON.stringify(data), orderId]
       );
 
-      console.log('Order updated successfully:', orderId);
+      console.log('✅ Order update result:', updateResult);
+      console.log('✅ Order', orderId, 'marked as PAID successfully');
+      console.log('========================================');
 
       res.json({ 
-        message: 'Payment verified successfully',
-        order: orderId
+        success: true,
+        message: 'Payment verified and order updated successfully',
+        orderId: orderId,
+        amount: data.amount / 100, // Convert from kobo to naira
+        reference: reference
       });
     } else {
-      console.error('Payment status not success:', data.status);
-      res.status(400).json({ message: 'Payment verification failed', status: data.status });
+      console.error('❌ Payment status not success:', data.status);
+      console.error('Payment data:', data);
+      res.status(400).json({ 
+        message: 'Payment was not successful', 
+        status: data.status,
+        paymentData: data
+      });
     }
   } catch (error) {
-    console.error('Paystack verify error:', error.response?.data || error.message);
+    console.error('========================================');
+    console.error('❌ PAYMENT VERIFICATION ERROR');
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.error('Error response:', error.response?.data);
+    console.error('Error status:', error.response?.status);
     console.error('Full error:', error);
+    console.error('========================================');
+    
     res.status(500).json({ 
-      message: 'Payment verification failed', 
+      success: false,
+      message: 'Payment verification failed due to server error', 
       error: error.response?.data?.message || error.message 
     });
   }
