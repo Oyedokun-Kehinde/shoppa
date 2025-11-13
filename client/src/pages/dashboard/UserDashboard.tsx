@@ -12,6 +12,17 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    label: '',
+    fullName: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    country: 'Nigeria',
+    zipCode: ''
+  });
 
   useEffect(() => {
     fetchOrders();
@@ -60,11 +71,13 @@ const UserDashboard = () => {
     }
   };
 
+  const totalSpent = orders.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+  
   const stats = [
     { icon: <Package className="h-8 w-8" />, label: 'Total Orders', value: orders.length.toString(), color: 'bg-blue-50 text-blue-600' },
     { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: orders.filter((o: any) => !o.isDelivered).length.toString(), color: 'bg-green-50 text-green-600' },
     { icon: <Heart className="h-8 w-8" />, label: 'Wishlist', value: wishlistItems.length.toString(), color: 'bg-pink-50 text-pink-600' },
-    { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `₦${orders.reduce((sum: number, o: any) => sum + o.totalPrice, 0).toLocaleString()}`, color: 'bg-purple-50 text-purple-600' },
+    { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `₦${totalSpent.toLocaleString()}`, color: 'bg-purple-50 text-purple-600' },
   ];
 
   const tabs = [
@@ -330,7 +343,7 @@ const UserDashboard = () => {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold">Saved Addresses</h2>
-                  <button className="btn-primary">
+                  <button onClick={() => setShowAddressModal(true)} className="btn-primary">
                     + Add New Address
                   </button>
                 </div>
@@ -434,6 +447,137 @@ const UserDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Address Modal */}
+      {showAddressModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold">Add New Address</h3>
+                <button
+                  onClick={() => setShowAddressModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XCircle className="h-6 w-6" />
+                </button>
+              </div>
+
+              <form onSubmit={(e) => { e.preventDefault(); toast.success('Address saved!'); setShowAddressModal(false); }} className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Address Label *</label>
+                    <input
+                      type="text"
+                      value={addressForm.label}
+                      onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })}
+                      placeholder="Home, Office, etc."
+                      className="input-field"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Full Name *</label>
+                    <input
+                      type="text"
+                      value={addressForm.fullName}
+                      onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })}
+                      placeholder="John Doe"
+                      className="input-field"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Phone Number *</label>
+                  <input
+                    type="tel"
+                    value={addressForm.phone}
+                    onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                    placeholder="+234 803 123 4567"
+                    className="input-field"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Street Address *</label>
+                  <textarea
+                    value={addressForm.address}
+                    onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+                    placeholder="123 Main Street, Alagbaka"
+                    className="input-field"
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">City *</label>
+                    <input
+                      type="text"
+                      value={addressForm.city}
+                      onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                      placeholder="Akure"
+                      className="input-field"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">State *</label>
+                    <input
+                      type="text"
+                      value={addressForm.state}
+                      onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
+                      placeholder="Ondo State"
+                      className="input-field"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Country *</label>
+                    <input
+                      type="text"
+                      value={addressForm.country}
+                      onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
+                      className="input-field"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">ZIP/Postal Code</label>
+                    <input
+                      type="text"
+                      value={addressForm.zipCode}
+                      onChange={(e) => setAddressForm({ ...addressForm, zipCode: e.target.value })}
+                      placeholder="340001"
+                      className="input-field"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button type="submit" className="btn-primary flex-1">
+                    Save Address
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddressModal(false)}
+                    className="btn-outline flex-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

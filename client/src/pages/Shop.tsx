@@ -320,13 +320,13 @@ const Shop = () => {
                       >
                         <Heart
                           className={`h-5 w-5 ${
-                            isInWishlist(product._id) ? 'fill-primary text-primary' : 'text-gray-400'
+                            isInWishlist(product.id) ? 'fill-primary text-primary' : 'text-gray-400'
                           }`}
                         />
                       </button>
                     </div>
 
-                    <Link to={`/product/${product._id}`}>
+                    <Link to={`/product/${product.slug || product.id}`}>
                       <h3 className="text-lg font-semibold mb-2 hover:text-primary transition-colors line-clamp-2">
                         {product.name}
                       </h3>
