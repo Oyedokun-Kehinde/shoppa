@@ -77,6 +77,42 @@ router.get('/myorders', protect, async (req, res) => {
   }
 });
 
+// @route   GET /api/orders/:id
+// @desc    Get single order by ID
+// @access  Private
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const pool = getPool();
+    
+    // Get order details
+    const [orders] = await pool.query(
+      'SELECT * FROM orders WHERE id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+
+    if (orders.length === 0) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const order = orders[0];
+
+    // Get order items
+    const [items] = await pool.query(
+      'SELECT * FROM order_items WHERE order_id = ?',
+      [req.params.id]
+    );
+
+    // Combine order with items
+    res.json({
+      ...order,
+      items
+    });
+  } catch (error) {
+    console.error('Get order error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // @route   POST /api/orders/paystack/initialize
 // @desc    Initialize Paystack payment
 // @access  Private
@@ -125,6 +161,12 @@ router.post('/paystack/verify', protect, async (req, res) => {
   try {
     const { reference } = req.body;
     
+    console.log('Verifying payment with reference:', reference);
+    
+    if (!reference) {
+      return res.status(400).json({ message: 'Payment reference is required' });
+    }
+    
     // Verify payment with Paystack
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
@@ -135,11 +177,19 @@ router.post('/paystack/verify', protect, async (req, res) => {
       }
     );
 
+    console.log('Paystack verification response:', response.data);
     const { data } = response.data;
     
     if (data.status === 'success') {
       const pool = getPool();
-      const orderId = data.metadata.orderId;
+      const orderId = data.metadata?.orderId || data.metadata?.order_id;
+      
+      console.log('Payment successful, updating order:', orderId);
+      
+      if (!orderId) {
+        console.error('Order ID not found in metadata:', data.metadata);
+        return res.status(400).json({ message: 'Order ID not found in payment metadata' });
+      }
       
       // Update order as paid
       await pool.query(
@@ -147,15 +197,19 @@ router.post('/paystack/verify', protect, async (req, res) => {
         [JSON.stringify(data), orderId]
       );
 
+      console.log('Order updated successfully:', orderId);
+
       res.json({ 
         message: 'Payment verified successfully',
         order: orderId
       });
     } else {
-      res.status(400).json({ message: 'Payment verification failed' });
+      console.error('Payment status not success:', data.status);
+      res.status(400).json({ message: 'Payment verification failed', status: data.status });
     }
   } catch (error) {
     console.error('Paystack verify error:', error.response?.data || error.message);
+    console.error('Full error:', error);
     res.status(500).json({ 
       message: 'Payment verification failed', 
       error: error.response?.data?.message || error.message 

@@ -33,6 +33,7 @@ import Register from './pages/auth/Register';
 // Dashboard
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
+import OrderDetail from './pages/OrderDetail';
 
 // Components
 import AnnouncementModal from './components/AnnouncementModal';
@@ -91,6 +92,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders/:id"
+              element={
+                <ProtectedRoute>
+                  <OrderDetail />
                 </ProtectedRoute>
               }
             />

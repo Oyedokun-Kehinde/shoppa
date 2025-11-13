@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useWishlistStore } from '../../store/wishlistStore';
 import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle, Download, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
 
 const UserDashboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { items: wishlistItems } = useWishlistStore();
   const [activeTab, setActiveTab] = useState('overview');
@@ -275,14 +276,17 @@ const UserDashboard = () => {
                           <Link to={`/orders/${order._id || order.id || ''}`} className="btn-outline flex-1 text-center">
                             View Details
                           </Link>
-                          {order.isPaid && (
+                          {order.is_paid && (
                             <button className="btn-secondary flex items-center justify-center space-x-2 flex-1">
                               <Download className="h-4 w-4" />
                               <span>Invoice</span>
                             </button>
                           )}
-                          {!order.isPaid && (
-                            <button className="btn-primary flex-1">
+                          {!order.is_paid && (
+                            <button 
+                              onClick={() => navigate(`/orders/${order._id || order.id}`)}
+                              className="btn-primary flex-1"
+                            >
                               Pay Now
                             </button>
                           )}
