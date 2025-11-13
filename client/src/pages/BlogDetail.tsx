@@ -130,7 +130,7 @@ const BlogDetail = () => {
   const handleReaction = async (type: string) => {
     if (!post) return;
 
-    // Generate session ID for non-logged-in users
+    // Always generate/retrieve session ID
     let sessionId = localStorage.getItem('sessionId');
     if (!sessionId) {
       sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -138,9 +138,11 @@ const BlogDetail = () => {
     }
 
     try {
-      const payload = user 
-        ? { reaction_type: type }
-        : { reaction_type: type, session_id: sessionId };
+      // Always send session_id, but also auth header if user is logged in
+      const payload = { 
+        reaction_type: type, 
+        session_id: sessionId 
+      };
 
       const headers = user 
         ? { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -156,6 +158,7 @@ const BlogDetail = () => {
       toast.success(`Reacted with ${type}!`);
       fetchBlogPost();
     } catch (error: any) {
+      console.error('Reaction error:', error);
       toast.error(error.response?.data?.message || 'Failed to add reaction');
     }
   };

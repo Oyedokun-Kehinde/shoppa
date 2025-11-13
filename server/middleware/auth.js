@@ -41,4 +41,34 @@ const admin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin };
+// Optional authentication - doesn't fail if no token
+const optionalAuth = async (req, res, next) => {
+  try {
+    let token;
+
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      const pool = getPool();
+      const [users] = await pool.query(
+        'SELECT id, name, email, role FROM users WHERE id = ?',
+        [decoded.id]
+      );
+
+      if (users.length > 0) {
+        req.user = users[0];
+      }
+    }
+    
+    next();
+  } catch (error) {
+    // Don't fail, just continue without user
+    next();
+  }
+};
+
+module.exports = { protect, admin, optionalAuth };

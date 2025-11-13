@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { getPool } = require('../config/database');
-const { protect, admin } = require('../middleware/auth');
+const { protect, admin, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -155,7 +155,7 @@ router.post('/:id/comments', protect, async (req, res) => {
 // @route   POST /api/blog/:id/reaction
 // @desc    Add/update reaction to blog post (logged in or anonymous)
 // @access  Public
-router.post('/:id/reaction', async (req, res) => {
+router.post('/:id/reaction', optionalAuth, async (req, res) => {
   try {
     const { reaction_type, session_id } = req.body;
     const pool = getPool();

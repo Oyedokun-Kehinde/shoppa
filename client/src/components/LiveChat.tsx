@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { MessageCircle, X, Send, User } from 'lucide-react';
 import api from '../lib/api';
 
@@ -93,8 +94,16 @@ const LiveChat = () => {
 
       setTimeout(() => {
         addBotMessage(
-          `✅ Thank you, ${name}! Your inquiry has been submitted successfully. Our team will get back to you at ${email} within 24 hours. Is there anything else I can help you with?`
+          `✅ Thank you, ${name}! Your inquiry has been submitted successfully. Our team will get back to you at ${email} within 24 hours.`
         );
+        
+        // Add quick links after success
+        setTimeout(() => {
+          addBotMessage(
+            `Meanwhile, here are some helpful links to explore:`
+          );
+        }, 800);
+        
         setStep('complete');
       }, 1500);
     } catch (error) {
@@ -185,6 +194,45 @@ const LiveChat = () => {
                 </div>
               </div>
             ))}
+            
+            {/* Quick Links - Show after inquiry is submitted */}
+            {step === 'complete' && (
+              <div className="flex flex-col space-y-2">
+                <Link 
+                  to="/shop" 
+                  onClick={() => setIsOpen(false)}
+                  className="bg-white text-dark px-4 py-3 rounded-xl hover:bg-primary hover:text-white transition-colors flex items-center space-x-2 shadow"
+                >
+                  <span>🛍️</span>
+                  <span className="font-semibold">Shop Products</span>
+                </Link>
+                <Link 
+                  to="/contact" 
+                  onClick={() => setIsOpen(false)}
+                  className="bg-white text-dark px-4 py-3 rounded-xl hover:bg-primary hover:text-white transition-colors flex items-center space-x-2 shadow"
+                >
+                  <span>📧</span>
+                  <span className="font-semibold">Contact Us</span>
+                </Link>
+                <Link 
+                  to="/faqs" 
+                  onClick={() => setIsOpen(false)}
+                  className="bg-white text-dark px-4 py-3 rounded-xl hover:bg-primary hover:text-white transition-colors flex items-center space-x-2 shadow"
+                >
+                  <span>❓</span>
+                  <span className="font-semibold">View FAQs</span>
+                </Link>
+                <Link 
+                  to="/blog" 
+                  onClick={() => setIsOpen(false)}
+                  className="bg-white text-dark px-4 py-3 rounded-xl hover:bg-primary hover:text-white transition-colors flex items-center space-x-2 shadow"
+                >
+                  <span>📝</span>
+                  <span className="font-semibold">Read Blog</span>
+                </Link>
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
 

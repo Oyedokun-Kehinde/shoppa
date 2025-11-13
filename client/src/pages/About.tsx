@@ -166,22 +166,22 @@ const About = () => {
       <section className="py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-dark mb-4">Vision & Mission</h2>
-            <p className="text-xl text-gray-600">
-              Guiding our path to excellence
+            <h2 className="text-4xl md:text-5xl font-bold text-dark mb-4">Vision & Mission</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Guiding our path to excellence in Nigerian e-commerce
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
+          <div className="grid md:grid-cols-2 gap-12">
             {/* Vision */}
-            <div className="card p-10 hover:shadow-2xl transition-all duration-300 border-t-4 border-primary">
-              <div className="flex items-center mb-6">
-                <div className="bg-primary/10 p-4 rounded-xl">
-                  <Target className="h-10 w-10 text-primary" />
+            <div className="card p-12 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-primary">
+              <div className="flex flex-col items-center text-center mb-8">
+                <div className="bg-primary/10 p-6 rounded-2xl mb-6">
+                  <Target className="h-12 w-12 text-primary" />
                 </div>
-                <h3 className="text-3xl font-bold text-dark ml-4">Our Vision</h3>
+                <h3 className="text-3xl font-bold text-dark">Our Vision</h3>
               </div>
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-lg text-gray-600 leading-relaxed text-center">
                 To become Nigeria's leading e-commerce platform, setting the standard for quality, 
                 accessibility, and customer satisfaction. We envision a future where every Nigerian, 
                 from Akure to Lagos, can access premium products with ease, delivered right to their doorstep 
@@ -190,14 +190,14 @@ const About = () => {
             </div>
 
             {/* Mission */}
-            <div className="card p-10 hover:shadow-2xl transition-all duration-300 border-t-4 border-blue-600">
-              <div className="flex items-center mb-6">
-                <div className="bg-blue-50 p-4 rounded-xl">
-                  <Award className="h-10 w-10 text-blue-600" />
+            <div className="card p-12 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-blue-600">
+              <div className="flex flex-col items-center text-center mb-8">
+                <div className="bg-blue-50 p-6 rounded-2xl mb-6">
+                  <Award className="h-12 w-12 text-blue-600" />
                 </div>
-                <h3 className="text-3xl font-bold text-dark ml-4">Our Mission</h3>
+                <h3 className="text-3xl font-bold text-dark">Our Mission</h3>
               </div>
-              <p className="text-lg text-gray-600 leading-relaxed">
+              <p className="text-lg text-gray-600 leading-relaxed text-center">
                 To empower Nigerian consumers by providing a seamless online shopping experience 
                 with authentic products, competitive prices, and reliable delivery. We are committed 
                 to supporting local businesses while bringing the world's best products to your doorstep, 
@@ -212,7 +212,7 @@ const About = () => {
       <section className="py-24 bg-gradient-to-r from-dark via-gray-900 to-dark text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Our Commitment to You</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Commitment to You</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               We pledge to uphold the highest standards in every aspect of our business
             </p>

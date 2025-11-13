@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../lib/api';
@@ -9,6 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: any) => {
     try {
@@ -64,7 +66,7 @@ const Login = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   {...register('password', {
                     required: 'Password is required',
                     minLength: {
@@ -72,9 +74,16 @@ const Login = () => {
                       message: 'Password must be at least 6 characters',
                     },
                   })}
-                  className="input-field pl-10"
+                  className="input-field pl-10 pr-10"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password.message as string}</p>

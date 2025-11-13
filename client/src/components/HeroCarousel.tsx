@@ -68,8 +68,8 @@ const HeroCarousel = () => {
             </div>
 
             {/* Content */}
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-              <div className="max-w-2xl">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center">
+              <div className="max-w-3xl text-center">
                 <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
                   {slide.title}
                 </h1>
