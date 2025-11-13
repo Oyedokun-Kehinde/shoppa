@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useWishlistStore } from '../../store/wishlistStore';
-import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle, Download, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
@@ -64,13 +64,14 @@ const UserDashboard = () => {
     { icon: <Package className="h-8 w-8" />, label: 'Total Orders', value: orders.length.toString(), color: 'bg-blue-50 text-blue-600' },
     { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: orders.filter((o: any) => !o.isDelivered).length.toString(), color: 'bg-green-50 text-green-600' },
     { icon: <Heart className="h-8 w-8" />, label: 'Wishlist', value: wishlistItems.length.toString(), color: 'bg-pink-50 text-pink-600' },
-    { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `$${orders.reduce((sum: number, o: any) => sum + o.totalPrice, 0).toFixed(2)}`, color: 'bg-purple-50 text-purple-600' },
+    { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `₦${orders.reduce((sum: number, o: any) => sum + o.totalPrice, 0).toLocaleString()}`, color: 'bg-purple-50 text-purple-600' },
   ];
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: <User className="h-5 w-5" /> },
     { id: 'orders', label: 'Orders', icon: <Package className="h-5 w-5" /> },
     { id: 'wishlist', label: 'Wishlist', icon: <Heart className="h-5 w-5" /> },
+    { id: 'addresses', label: 'Addresses', icon: <MapPin className="h-5 w-5" /> },
     { id: 'profile', label: 'Profile', icon: <Settings className="h-5 w-5" /> },
   ];
 
@@ -145,7 +146,7 @@ const UserDashboard = () => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-primary">${order.totalPrice.toFixed(2)}</p>
+                            <p className="font-bold text-primary">₦{order.totalPrice.toLocaleString()}</p>
                             <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(order.status)}`}>
                               {order.status}
                             </span>
@@ -241,7 +242,7 @@ const UserDashboard = () => {
                                   <p className="font-semibold">{item.name}</p>
                                   <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                                 </div>
-                                <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
+                                <p className="font-bold">₦{(item.price * item.quantity).toLocaleString()}</p>
                               </div>
                             ))}
                           </div>
@@ -251,7 +252,7 @@ const UserDashboard = () => {
                               <MapPin className="h-4 w-4" />
                               <span className="text-sm">{order.shippingAddress.city}, {order.shippingAddress.country}</span>
                             </div>
-                            <p className="text-2xl font-bold text-primary">${order.totalPrice.toFixed(2)}</p>
+                            <p className="text-2xl font-bold text-primary">₦{order.totalPrice.toLocaleString()}</p>
                           </div>
                         </div>
 
@@ -259,6 +260,12 @@ const UserDashboard = () => {
                           <Link to={`/orders/${order._id}`} className="btn-outline flex-1 text-center">
                             View Details
                           </Link>
+                          {order.isPaid && (
+                            <button className="btn-secondary flex items-center justify-center space-x-2 flex-1">
+                              <Download className="h-4 w-4" />
+                              <span>Invoice</span>
+                            </button>
+                          )}
                           {!order.isPaid && (
                             <button className="btn-primary flex-1">
                               Pay Now
@@ -300,7 +307,7 @@ const UserDashboard = () => {
                         <div className="p-4">
                           <p className="text-sm text-gray-500 mb-1">{item.product.category}</p>
                           <h3 className="font-semibold mb-2">{item.product.name}</h3>
-                          <p className="text-2xl font-bold text-primary">${item.product.price}</p>
+                          <p className="text-2xl font-bold text-primary">₦{item.product.price.toLocaleString()}</p>
                         </div>
                       </Link>
                     ))}
@@ -314,6 +321,73 @@ const UserDashboard = () => {
                     </Link>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Addresses Tab */}
+            {activeTab === 'addresses' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Saved Addresses</h2>
+                  <button className="btn-primary">
+                    + Add New Address
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Example addresses - in real app, fetch from backend */}
+                  <div className="card p-6 border-2 border-primary">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <span className="bg-primary text-white text-xs px-2 py-1 rounded">Default</span>
+                        <h3 className="font-bold text-lg mt-2">Home</h3>
+                      </div>
+                      <button className="text-gray-400 hover:text-primary">
+                        <Settings className="h-5 w-5" />
+                      </button>
+                    </div>
+                    <p className="text-gray-600">
+                      {user?.name}<br />
+                      123 Main Street, Alagbaka<br />
+                      Akure, Ondo State 340001<br />
+                      Nigeria<br />
+                      Phone: +234 803 123 4567
+                    </p>
+                    <div className="mt-4 flex space-x-2">
+                      <button className="text-sm text-primary hover:underline">Edit</button>
+                      <button className="text-sm text-red-600 hover:underline">Remove</button>
+                    </div>
+                  </div>
+
+                  <div className="card p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <h3 className="font-bold text-lg">Office</h3>
+                      <button className="text-gray-400 hover:text-primary">
+                        <Settings className="h-5 w-5" />
+                      </button>
+                    </div>
+                    <p className="text-gray-600">
+                      {user?.name}<br />
+                      456 Business Avenue<br />
+                      Ikeja, Lagos State 100001<br />
+                      Nigeria<br />
+                      Phone: +234 803 765 4321
+                    </p>
+                    <div className="mt-4 flex space-x-2">
+                      <button className="text-sm text-primary hover:underline">Edit</button>
+                      <button className="text-sm text-primary hover:underline">Set as Default</button>
+                      <button className="text-sm text-red-600 hover:underline">Remove</button>
+                    </div>
+                  </div>
+
+                  {/* Add new address card */}
+                  <div className="card p-6 border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-primary hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div className="text-center">
+                      <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-600 font-semibold">Add New Address</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
