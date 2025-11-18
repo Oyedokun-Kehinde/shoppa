@@ -29,11 +29,11 @@ const Checkout = () => {
   }, [isAuthenticated, navigate]);
 
   const total = getTotalPrice();
-  // Shipping: 5% of cart value, min ₦3,000, max ₦10,000, free over ₦200,000
+  // Shipping: 5% of cart value, min ₦1,500, max ₦10,000, free over ₦200,000
   const calculateShipping = () => {
     if (total >= 200000) return 0; // Free shipping
     const percentage = total * 0.05;
-    return Math.min(Math.max(percentage, 3000), 10000); // Between ₦3,000 and ₦10,000
+    return Math.min(Math.max(percentage, 1500), 10000); // Between ₦1,500 and ₦10,000
   };
   const shippingPrice = calculateShipping();
   const taxPrice = total * 0.075; // 7.5% VAT (Nigerian standard)

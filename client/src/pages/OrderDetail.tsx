@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Package, MapPin, CreditCard, Truck, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Package, MapPin, CreditCard, Truck, CheckCircle, Clock, AlertCircle, Download } from 'lucide-react';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
+import Receipt from '../components/Receipt';
 
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   useEffect(() => {
     fetchOrder();
@@ -188,17 +190,31 @@ const OrderDetail = () => {
             </div>
 
             {/* Actions */}
-            {!order.is_paid && (
+            {!order.is_paid ? (
               <div className="card p-6">
                 <h2 className="text-xl font-bold text-dark mb-4">Payment Required</h2>
                 <p className="text-sm text-gray-600 mb-4">
                   Complete your payment to process this order.
                 </p>
-                <button 
+                <button
                   onClick={() => navigate('/checkout')}
                   className="btn-primary w-full"
                 >
                   Pay Now
+                </button>
+              </div>
+            ) : (
+              <div className="card p-6">
+                <h2 className="text-xl font-bold text-dark mb-4">✅ Payment Completed</h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  Your order has been paid successfully. Download your receipt below.
+                </p>
+                <button
+                  onClick={() => setShowReceipt(true)}
+                  className="btn-primary w-full flex items-center justify-center gap-2"
+                >
+                  <Download className="h-5 w-5" />
+                  Download Receipt
                 </button>
               </div>
             )}
@@ -219,6 +235,14 @@ const OrderDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Receipt Modal */}
+      {showReceipt && order && (
+        <Receipt
+          order={order}
+          onClose={() => setShowReceipt(false)}
+        />
+      )}
     </div>
   );
 };
