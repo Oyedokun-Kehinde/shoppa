@@ -39,7 +39,7 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
                 th { background-color: #f3f4f6; font-weight: 600; }
                 .total-section { background-color: #f9fafb; padding: 20px; border-radius: 8px; margin-top: 20px; }
                 .total-row { display: flex; justify-content: space-between; margin: 8px 0; }
-                .total-amount { font-size: 24px; font-weight: bold; color: #4F46E5; }
+                .total-amount { font-size: 24px; font-weight: bold; color: #DC2626; }
                 .footer { text-align: center; margin-top: 40px; color: #6b7280; font-size: 14px; }
                 .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
                 .status-paid { background-color: #dcfce7; color: #166534; }
@@ -92,7 +92,7 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
         }
       }}
     >
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full my-8">
+      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full my-4 max-h-[95vh] overflow-y-auto">
         {/* Header Actions */}
         <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 rounded-t-xl no-print">
           <div className="flex justify-between items-center">
@@ -123,10 +123,10 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
         </div>
 
         {/* Receipt Content */}
-        <div ref={receiptRef} className="p-8 receipt-container">
+        <div ref={receiptRef} className="p-6 receipt-container">
           {/* Company Header */}
-          <div className="header text-center mb-8">
-            <div className="logo text-4xl font-bold text-red-600 mb-2">Shoppa</div>
+          <div className="header text-center mb-6">
+            <div className="logo text-3xl font-bold text-red-600 mb-1">Shoppa</div>
             <p className="text-gray-600">Your Trusted Online Shopping Partner</p>
             <p className="text-sm text-gray-500 mt-2">
               📧 support@shoppa.com | 📞 +234-XXX-XXX-XXXX
@@ -136,15 +136,15 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
           <div className="divider"></div>
 
           {/* Payment Success Badge */}
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center gap-3 bg-green-50 border-2 border-green-200 rounded-full px-6 py-3">
-              <Check className="h-6 w-6 text-green-600" />
-              <span className="text-lg font-semibold text-green-700">Payment Successful</span>
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center gap-2 bg-green-50 border-2 border-green-200 rounded-full px-4 py-2">
+              <Check className="h-5 w-5 text-green-600" />
+              <span className="text-base font-semibold text-green-700">Payment Successful</span>
             </div>
           </div>
 
           {/* Order Information */}
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
             <div className="section">
               <h3 className="section-title text-gray-700">Order Details</h3>
               <div className="space-y-2">
@@ -184,7 +184,7 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
 
           {/* Order Items */}
           <div className="section">
-            <h3 className="section-title text-gray-700 mb-4">Order Items</h3>
+            <h3 className="section-title text-gray-700 mb-3">Order Items</h3>
             <table className="w-full">
               <thead>
                 <tr>
@@ -227,7 +227,7 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
             </div>
             <div className="divider my-3"></div>
             <div className="total-row">
-              <span className="text-xl font-bold text-gray-900">Total Amount:</span>
+              <span className="text-lg font-bold text-gray-900">Total Amount:</span>
               <span className="total-amount">{formatCurrency(parseFloat(order.total_price))}</span>
             </div>
           </div>
