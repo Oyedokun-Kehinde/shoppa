@@ -17,6 +17,8 @@ const UserDashboard = () => {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [addressForm, setAddressForm] = useState({
     label: '',
     fullName: '',
@@ -85,9 +87,12 @@ const UserDashboard = () => {
     return sum;
   }, 0);
   
+  // Active orders = Paid orders that are NOT delivered
+  const activeOrders = orders.filter((o: any) => o.is_paid && o.status !== 'Delivered');
+  
   const stats = [
     { icon: <Package className="h-8 w-8" />, label: 'Total Orders', value: orders.length.toString(), color: 'bg-blue-50 text-blue-600' },
-    { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: orders.filter((o: any) => !o.is_delivered).length.toString(), color: 'bg-green-50 text-green-600' },
+    { icon: <ShoppingBag className="h-8 w-8" />, label: 'Active Orders', value: activeOrders.length.toString(), color: 'bg-green-50 text-green-600' },
     { icon: <Heart className="h-8 w-8" />, label: 'Wishlist', value: wishlistItems.length.toString(), color: 'bg-pink-50 text-pink-600' },
     { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `₦${totalSpent.toLocaleString()}`, color: 'bg-purple-50 text-purple-600' },
   ];
@@ -95,6 +100,20 @@ const UserDashboard = () => {
   const handleViewReceipt = (order: any) => {
     setSelectedReceipt(order);
     setShowReceipt(true);
+  };
+
+  const handleDeleteFromWishlist = (item: any) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteFromWishlist = () => {
+    if (itemToDelete) {
+      useWishlistStore.getState().removeItem(itemToDelete.id);
+      toast.success('Removed from wishlist');
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    }
   };
 
   const tabs = [
@@ -166,18 +185,18 @@ const UserDashboard = () => {
                   ) : (orders && orders.length > 0) ? (
                     <div className="space-y-4">
                       {(orders || []).slice(0, 3).map((order: any, idx: number) => (
-                        <div key={order._id || order.id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div key={order.id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                           <div className="flex items-center space-x-4">
                             {getStatusIcon(order.status || 'Pending')}
                             <div>
-                              <p className="font-semibold">Order #{(order._id || order.id || 'N/A').toString().slice(-8)}</p>
+                              <p className="font-semibold">Order #{order.id.toString().slice(-8)}</p>
                               <p className="text-sm text-gray-600">
-                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date unavailable'}
+                                {new Date(order.created_at || order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-primary">₦{(order.totalPrice || 0).toLocaleString()}</p>
+                            <p className="font-bold text-primary">₦{parseFloat(order.total_price || order.totalPrice || 0).toLocaleString()}</p>
                             <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(order.status || 'Pending')}`}>
                               {order.status || 'Pending'}
                             </span>
@@ -242,14 +261,14 @@ const UserDashboard = () => {
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
                   </div>
                 ) : (orders && orders.length > 0) ? (
-                  <div className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
                     {(orders || []).map((order: any, orderIdx: number) => (
-                      <div key={order._id || order.id || orderIdx} className="card p-6">
+                      <div key={order.id || orderIdx} className="card p-6">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                           <div>
-                            <h3 className="font-bold text-lg mb-1">Order #{(order._id || order.id || 'N/A').toString().slice(-8)}</h3>
+                            <h3 className="font-bold text-lg mb-1">Order #{order.id.toString().slice(-8)}</h3>
                             <p className="text-sm text-gray-600">
-                              Placed on {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date unavailable'}
+                              Placed on {new Date(order.created_at || order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                             </p>
                           </div>
                           <div className="flex items-center space-x-4 mt-4 md:mt-0">
@@ -257,23 +276,23 @@ const UserDashboard = () => {
                               {order.status || 'Pending'}
                             </span>
                             <span className={`text-sm px-4 py-2 rounded-full font-semibold ${
-                              order.isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              order.is_paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                             }`}>
-                              {order.isPaid ? 'Paid' : 'Unpaid'}
+                              {order.is_paid ? 'Paid' : 'Unpaid'}
                             </span>
                           </div>
                         </div>
 
                         <div className="border-t border-gray-200 pt-4">
                           <div className="space-y-3 mb-4">
-                            {(order.orderItems || []).map((item: any, idx: number) => (
+                            {(order.items || []).map((item: any, idx: number) => (
                               <div key={idx} className="flex items-center space-x-4">
                                 <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
                                 <div className="flex-1">
                                   <p className="font-semibold">{item.name}</p>
                                   <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                                 </div>
-                                <p className="font-bold">₦{(item.price * item.quantity).toLocaleString()}</p>
+                                <p className="font-bold">₦{(parseFloat(item.price) * item.quantity).toLocaleString()}</p>
                               </div>
                             ))}
                           </div>
@@ -282,15 +301,15 @@ const UserDashboard = () => {
                             <div className="flex items-center space-x-2 text-gray-600">
                               <MapPin className="h-4 w-4" />
                               <span className="text-sm">
-                                {order.shippingAddress ? `${order.shippingAddress.city || 'N/A'}, ${order.shippingAddress.country || 'N/A'}` : 'Address not available'}
+                                {order.shipping_address_city}, {order.shipping_address_country}
                               </span>
                             </div>
-                            <p className="text-2xl font-bold text-primary">₦{(order.totalPrice || 0).toLocaleString()}</p>
+                            <p className="text-2xl font-bold text-primary">₦{parseFloat(order.total_price || 0).toLocaleString()}</p>
                           </div>
                         </div>
 
                         <div className="mt-4 flex space-x-3">
-                          <Link to={`/orders/${order._id || order.id || ''}`} className="btn-outline flex-1 text-center">
+                          <Link to={`/orders/${order.id}`} className="btn-outline flex-1 text-center">
                             View Details
                           </Link>
                           {order.is_paid && (
@@ -304,7 +323,7 @@ const UserDashboard = () => {
                           )}
                           {!order.is_paid && (
                             <button 
-                              onClick={() => navigate(`/orders/${order._id || order.id}`)}
+                              onClick={() => navigate(`/orders/${order.id}`)}
                               className="btn-primary flex-1"
                             >
                               Pay Now
@@ -410,21 +429,33 @@ const UserDashboard = () => {
                 {wishlistItems.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {wishlistItems.map((item: any) => (
-                      <Link
+                      <div
                         key={item.id}
-                        to={`/shop`}
                         className="card overflow-hidden hover:shadow-lg transition-shadow"
                       >
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-48 object-cover"
-                        />
+                        <Link to={`/product/${item.slug || item.id}`}>
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-48 object-cover"
+                          />
+                        </Link>
                         <div className="p-4">
-                          <h3 className="font-semibold mb-2">{item.name}</h3>
-                          <p className="text-2xl font-bold text-primary">₦{item.price.toLocaleString()}</p>
+                          <Link to={`/product/${item.slug || item.id}`}>
+                            <h3 className="font-semibold mb-2 hover:text-primary transition-colors">{item.name}</h3>
+                          </Link>
+                          <div className="flex items-center justify-between mt-3">
+                            <p className="text-2xl font-bold text-primary">₦{item.price.toLocaleString()}</p>
+                            <button
+                              onClick={() => handleDeleteFromWishlist(item)}
+                              className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors text-sm font-semibold"
+                            >
+                              <XCircle className="h-4 w-4" />
+                              Remove
+                            </button>
+                          </div>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -689,6 +720,38 @@ const UserDashboard = () => {
             setSelectedReceipt(null);
           }}
         />
+      )}
+
+      {/* Delete Wishlist Item Confirmation Modal */}
+      {showDeleteModal && itemToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+              <XCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2">Remove from Wishlist?</h2>
+            <p className="text-gray-600 text-center mb-6">
+              Are you sure you want to remove <span className="font-semibold">"{itemToDelete.name}"</span> from your wishlist?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setItemToDelete(null);
+                }}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteFromWishlist}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+              >
+                Yes, Remove
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
