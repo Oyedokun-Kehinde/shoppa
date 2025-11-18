@@ -162,37 +162,11 @@ router.post('/:id/reaction', optionalAuth, async (req, res) => {
       return res.status(400).json({ message: 'Invalid reaction type' });
     }
 
-    // Check if user/session already has THIS SPECIFIC reaction type
-    let existingReaction;
-    if (userId) {
-      const { rows } = await pool.query(
-        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND user_id = $2 AND reaction_type = $3',
-        [req.params.id, userId, reaction_type]
-      );
-      existingReaction = rows;
-    } else if (session_id) {
-      const { rows } = await pool.query(
-        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND session_id = $2 AND reaction_type = $3',
-        [req.params.id, session_id, reaction_type]
-      );
-      existingReaction = rows;
-    } else {
-      return res.status(400).json({ message: 'User ID or session ID required' });
-    }
-
-    if (existingReaction.length > 0) {
-      // Remove reaction (toggle off)
-      await pool.query(
-        'DELETE FROM blog_reactions WHERE id = $1',
-        [existingReaction[0].id]
-      );
-    } else {
-      // Add new reaction
-      await pool.query(
-        'INSERT INTO blog_reactions (blog_post_id, user_id, session_id, reaction_type) VALUES ($1, $2, $3, $4)',
-        [req.params.id, userId, session_id, reaction_type]
-      );
-    }
+    // Always add new reaction - no limits, no toggle
+    await pool.query(
+      'INSERT INTO blog_reactions (blog_post_id, user_id, session_id, reaction_type) VALUES ($1, $2, $3, $4)',
+      [req.params.id, userId, session_id, reaction_type]
+    );
 
     // Update reaction counts
     const { rows: reactions } = await pool.query(

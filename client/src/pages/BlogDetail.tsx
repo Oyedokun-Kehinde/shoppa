@@ -172,14 +172,8 @@ const BlogDetail = () => {
         { headers }
       );
 
-      // Toggle reaction in array
-      setUserReactions(prev => {
-        if (prev.includes(type)) {
-          return prev.filter(r => r !== type); // Remove
-        } else {
-          return [...prev, type]; // Add
-        }
-      });
+      // Always add reaction - no toggle, unlimited clicks
+      setUserReactions(prev => [...prev, type]);
       
       // Update post counts immediately from response
       if (response.data.counts && post) {
@@ -192,8 +186,7 @@ const BlogDetail = () => {
         });
       }
       
-      const action = userReactions.includes(type) ? 'removed' : 'added';
-      toast.success(`Reaction ${action}!`);
+      toast.success(`Reacted with ${type}!`);
     } catch (error: any) {
       console.error('Reaction error:', error);
       toast.error(error.response?.data?.message || 'Failed to add reaction');
@@ -295,7 +288,12 @@ const BlogDetail = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {reactions.map((reaction) => {
                   const Icon = reaction.icon;
-                  const count = post[`${reaction.type}s_count` as keyof BlogPost] as number || 0;
+                  // Map reaction type to correct field name
+                  const countField = reaction.type === 'like' ? 'likes_count'
+                    : reaction.type === 'love' ? 'loves_count'
+                    : reaction.type === 'insightful' ? 'insightful_count'
+                    : 'celebrate_count';
+                  const count = post[countField as keyof BlogPost] as number || 0;
                   const isActive = userReactions.includes(reaction.type);
                   
                   return (

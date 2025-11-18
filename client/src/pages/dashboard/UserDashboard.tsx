@@ -185,7 +185,11 @@ const UserDashboard = () => {
                   ) : (orders && orders.length > 0) ? (
                     <div className="space-y-4">
                       {(orders || []).slice(0, 3).map((order: any, idx: number) => (
-                        <div key={order.id || idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <Link 
+                          key={order.id || idx} 
+                          to={`/orders/${order.id}`}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        >
                           <div className="flex items-center space-x-4">
                             {getStatusIcon(order.status || 'Pending')}
                             <div>
@@ -201,7 +205,7 @@ const UserDashboard = () => {
                               {order.status || 'Pending'}
                             </span>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   ) : (
@@ -225,21 +229,34 @@ const UserDashboard = () => {
                     <h2 className="text-2xl font-bold mb-6">Your Wishlist</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {(wishlistItems || []).slice(0, 4).map((item: any) => (
-                        <Link
+                        <div
                           key={item.id}
-                          to={`/shop`}
-                          className="card overflow-hidden hover:shadow-lg transition-shadow"
+                          className="card overflow-hidden hover:shadow-lg transition-shadow relative"
                         >
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-32 object-cover"
-                          />
+                          <Link to={`/product/${item.slug || item.id}`}>
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-32 object-cover"
+                            />
+                          </Link>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleDeleteFromWishlist(item);
+                            }}
+                            className="absolute top-2 right-2 bg-white bg-opacity-90 hover:bg-red-500 hover:text-white text-gray-700 rounded-full p-1.5 shadow-lg transition-colors"
+                            title="Remove from wishlist"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </button>
                           <div className="p-3">
-                            <h3 className="font-semibold text-sm line-clamp-1">{item.name}</h3>
+                            <Link to={`/product/${item.slug || item.id}`}>
+                              <h3 className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors">{item.name}</h3>
+                            </Link>
                             <p className="text-primary font-bold">₦{item.price.toLocaleString()}</p>
                           </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                     {wishlistItems.length > 4 && (
