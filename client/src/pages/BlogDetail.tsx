@@ -111,17 +111,34 @@ const BlogDetail = () => {
 
     try {
       setSubmittingComment(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        toast.error('Please login again to comment');
+        return;
+      }
+
+      console.log('Submitting comment for post:', post?.id);
+      
       await axios.post(
         `http://localhost:5000/api/blog/${post?.id}/comments`,
-        { comment: commentText },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }}
+        { comment: commentText.trim() },
+        { headers: { Authorization: `Bearer ${token}` }}
       );
       
       toast.success('Comment posted successfully!');
       setCommentText('');
-      fetchBlogPost();
+      
+      // Refresh comments
+      const commentsRes = await axios.get(`http://localhost:5000/api/blog/${post?.id}/comments`);
+      setComments(commentsRes.data);
+      
+      // Refresh post to update comment count
+      await fetchBlogPost();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to post comment');
+      console.error('Comment submission error:', error);
+      console.error('Error response:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Unable to post comment. Please try again.');
     } finally {
       setSubmittingComment(false);
     }
@@ -156,8 +173,8 @@ const BlogDetail = () => {
 
       setUserReaction(type);
       
-      // Update post counts immediately if response includes them
-      if (response.data.counts) {
+      // Update post counts immediately from response
+      if (response.data.counts && post) {
         setPost({
           ...post,
           likes_count: response.data.counts.likes_count,
@@ -168,8 +185,6 @@ const BlogDetail = () => {
       }
       
       toast.success(`Reacted with ${type}!`);
-      // Also refresh to ensure data consistency
-      fetchBlogPost();
     } catch (error: any) {
       console.error('Reaction error:', error);
       toast.error(error.response?.data?.message || 'Failed to add reaction');

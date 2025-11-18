@@ -78,18 +78,18 @@ const AnnouncementModal = () => {
   ];
 
   useEffect(() => {
-    // Show modal every 60 seconds (1 minute)
+    // Show modal every 5 minutes
     const showModal = () => {
       setIsOpen(true);
       // Rotate content
       setCurrentContent((prev) => (prev + 1) % modalContents.length);
     };
 
-    // Show first modal after 10 seconds
-    const initialTimer = setTimeout(showModal, 10000);
+    // Show first modal after 30 seconds
+    const initialTimer = setTimeout(showModal, 30000);
 
-    // Then show every 60 seconds
-    const intervalTimer = setInterval(showModal, 60000);
+    // Then show every 5 minutes (300000ms)
+    const intervalTimer = setInterval(showModal, 300000);
 
     return () => {
       clearTimeout(initialTimer);
