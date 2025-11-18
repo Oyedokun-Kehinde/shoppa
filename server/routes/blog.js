@@ -162,18 +162,18 @@ router.post('/:id/reaction', optionalAuth, async (req, res) => {
       return res.status(400).json({ message: 'Invalid reaction type' });
     }
 
-    // Check if user/session already reacted
+    // Check if user/session already has THIS SPECIFIC reaction type
     let existingReaction;
     if (userId) {
       const { rows } = await pool.query(
-        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND user_id = $2',
-        [req.params.id, userId]
+        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND user_id = $2 AND reaction_type = $3',
+        [req.params.id, userId, reaction_type]
       );
       existingReaction = rows;
     } else if (session_id) {
       const { rows } = await pool.query(
-        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND session_id = $2',
-        [req.params.id, session_id]
+        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND session_id = $2 AND reaction_type = $3',
+        [req.params.id, session_id, reaction_type]
       );
       existingReaction = rows;
     } else {
@@ -181,13 +181,13 @@ router.post('/:id/reaction', optionalAuth, async (req, res) => {
     }
 
     if (existingReaction.length > 0) {
-      // Update existing reaction
+      // Remove reaction (toggle off)
       await pool.query(
-        'UPDATE blog_reactions SET reaction_type = $1 WHERE id = $2',
-        [reaction_type, existingReaction[0].id]
+        'DELETE FROM blog_reactions WHERE id = $1',
+        [existingReaction[0].id]
       );
     } else {
-      // Insert new reaction
+      // Add new reaction
       await pool.query(
         'INSERT INTO blog_reactions (blog_post_id, user_id, session_id, reaction_type) VALUES ($1, $2, $3, $4)',
         [req.params.id, userId, session_id, reaction_type]
@@ -256,11 +256,9 @@ router.get('/:id/reaction', optionalAuth, async (req, res) => {
       reactions = rows;
     }
 
-    if (reactions.length > 0) {
-      res.json({ reaction: reactions[0].reaction_type });
-    } else {
-      res.json({ reaction: null });
-    }
+    // Return array of all reaction types user has made
+    const reactionTypes = reactions.map(r => r.reaction_type);
+    res.json({ reactions: reactionTypes });
   } catch (error) {
     console.error('Get reaction error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });

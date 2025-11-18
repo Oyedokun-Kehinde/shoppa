@@ -15,7 +15,7 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 300000]);
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState('featured');
 
@@ -74,16 +74,17 @@ const Shop = () => {
     .filter((product: any) => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+      const productPrice = parseFloat(product.price);
+      const matchesPrice = productPrice >= priceRange[0] && productPrice <= priceRange[1];
       const matchesRating = product.rating >= minRating;
       return matchesSearch && matchesCategory && matchesPrice && matchesRating;
     })
     .sort((a: any, b: any) => {
       switch (sortBy) {
         case 'price-low':
-          return a.price - b.price;
+          return parseFloat(a.price) - parseFloat(b.price);
         case 'price-high':
-          return b.price - a.price;
+          return parseFloat(b.price) - parseFloat(a.price);
         case 'rating':
           return b.rating - a.rating;
         case 'name':
@@ -218,14 +219,14 @@ const Shop = () => {
                   <input
                     type="range"
                     min="0"
-                    max="1000"
+                    max="300000"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
                     className="w-full accent-primary"
                   />
                   <div className="flex justify-between text-xs text-gray-600">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
+                    <span>₦{priceRange[0].toLocaleString()}</span>
+                    <span>₦{priceRange[1].toLocaleString()}</span>
                   </div>
                 </div>
               </div>

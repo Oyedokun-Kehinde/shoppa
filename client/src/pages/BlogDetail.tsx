@@ -47,7 +47,7 @@ const BlogDetail = () => {
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [userReaction, setUserReaction] = useState<string | null>(null);
+  const [userReactions, setUserReactions] = useState<string[]>([]);
 
   const reactions: Reaction[] = [
     { type: 'like', icon: ThumbsUp, label: 'Like', color: 'text-blue-600' },
@@ -76,16 +76,17 @@ const BlogDetail = () => {
         setRelatedPosts(relatedRes.data.filter((p: BlogPost) => p.id !== data.id).slice(0, 3));
       }
 
-      // Check user's reaction
+      // Check user's reactions
       if (user) {
         try {
           const reactionRes = await axios.get(
             `http://localhost:5000/api/blog/${data.id}/reaction`,
             { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }}
           );
-          setUserReaction(reactionRes.data.reaction);
+          setUserReactions(reactionRes.data.reactions || []);
         } catch (err) {
-          // No reaction yet
+          // No reactions yet
+          setUserReactions([]);
         }
       }
     } catch (error) {
@@ -171,7 +172,14 @@ const BlogDetail = () => {
         { headers }
       );
 
-      setUserReaction(type);
+      // Toggle reaction in array
+      setUserReactions(prev => {
+        if (prev.includes(type)) {
+          return prev.filter(r => r !== type); // Remove
+        } else {
+          return [...prev, type]; // Add
+        }
+      });
       
       // Update post counts immediately from response
       if (response.data.counts && post) {
@@ -184,7 +192,8 @@ const BlogDetail = () => {
         });
       }
       
-      toast.success(`Reacted with ${type}!`);
+      const action = userReactions.includes(type) ? 'removed' : 'added';
+      toast.success(`Reaction ${action}!`);
     } catch (error: any) {
       console.error('Reaction error:', error);
       toast.error(error.response?.data?.message || 'Failed to add reaction');
@@ -287,7 +296,7 @@ const BlogDetail = () => {
                 {reactions.map((reaction) => {
                   const Icon = reaction.icon;
                   const count = post[`${reaction.type}s_count` as keyof BlogPost] as number || 0;
-                  const isActive = userReaction === reaction.type;
+                  const isActive = userReactions.includes(reaction.type);
                   
                   return (
                     <button
