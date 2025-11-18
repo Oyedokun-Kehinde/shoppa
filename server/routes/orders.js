@@ -10,6 +10,9 @@ const router = express.Router();
 // @access  Private
 router.post('/', protect, async (req, res) => {
   try {
+    console.log('📦 Creating order for user:', req.user?.id);
+    console.log('📦 Request body:', JSON.stringify(req.body, null, 2));
+    
     const {
       orderItems,
       shippingAddress,
@@ -21,8 +24,17 @@ router.post('/', protect, async (req, res) => {
     } = req.body;
 
     if (!orderItems || orderItems.length === 0) {
+      console.error('❌ No order items provided');
       return res.status(400).json({ message: 'No order items' });
     }
+
+    if (!req.user || !req.user.id) {
+      console.error('❌ User not authenticated');
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    console.log('✅ Order validation passed');
+    console.log('📦 Inserting order into database...');
 
     const pool = getPool();
     const { rows: [result] } = await pool.query(
@@ -43,9 +55,12 @@ router.post('/', protect, async (req, res) => {
     );
 
     const orderId = result.id;
+    console.log('✅ Order created with ID:', orderId);
 
     // Insert order items
+    console.log(`📦 Inserting ${orderItems.length} order items...`);
     for (const item of orderItems) {
+      console.log('  - Item:', item.name, 'Product ID:', item.product);
       await pool.query(
         `INSERT INTO order_items (order_id, product_id, name, quantity, image, price) 
          VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -53,9 +68,11 @@ router.post('/', protect, async (req, res) => {
       );
     }
 
+    console.log('✅ Order items inserted successfully');
     res.status(201).json({ _id: orderId, id: orderId, message: 'Order created' });
   } catch (error) {
-    console.error('Create order error:', error);
+    console.error('❌ Create order error:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

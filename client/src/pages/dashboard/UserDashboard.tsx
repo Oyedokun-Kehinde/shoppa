@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useWishlistStore } from '../../store/wishlistStore';
-import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle, Download } from 'lucide-react';
+import { Package, ShoppingBag, Heart, Settings, User, MapPin, CreditCard, Truck, CheckCircle, Clock, XCircle, Download, FileText, Receipt as ReceiptIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
+import Receipt from '../../components/Receipt';
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ const UserDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [addressForm, setAddressForm] = useState({
     label: '',
     fullName: '',
@@ -89,9 +92,15 @@ const UserDashboard = () => {
     { icon: <CreditCard className="h-8 w-8" />, label: 'Total Spent', value: `₦${totalSpent.toLocaleString()}`, color: 'bg-purple-50 text-purple-600' },
   ];
 
+  const handleViewReceipt = (order: any) => {
+    setSelectedReceipt(order);
+    setShowReceipt(true);
+  };
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: <User className="h-5 w-5" /> },
     { id: 'orders', label: 'Orders', icon: <Package className="h-5 w-5" /> },
+    { id: 'receipts', label: 'Receipts', icon: <ReceiptIcon className="h-5 w-5" /> },
     { id: 'wishlist', label: 'Wishlist', icon: <Heart className="h-5 w-5" /> },
     { id: 'addresses', label: 'Addresses', icon: <MapPin className="h-5 w-5" /> },
     { id: 'profile', label: 'Profile', icon: <Settings className="h-5 w-5" /> },
@@ -285,9 +294,12 @@ const UserDashboard = () => {
                             View Details
                           </Link>
                           {order.is_paid && (
-                            <button className="btn-secondary flex items-center justify-center space-x-2 flex-1">
+                            <button 
+                              onClick={() => handleViewReceipt(order)}
+                              className="btn-secondary flex items-center justify-center space-x-2 flex-1"
+                            >
                               <Download className="h-4 w-4" />
-                              <span>Invoice</span>
+                              <span>Receipt</span>
                             </button>
                           )}
                           {!order.is_paid && (
@@ -310,6 +322,83 @@ const UserDashboard = () => {
                       Start Shopping
                     </Link>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* Receipts Tab */}
+            {activeTab === 'receipts' && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">Payment Receipts</h2>
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <>
+                    {orders.filter((o: any) => o.is_paid).length > 0 ? (
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {orders.filter((o: any) => o.is_paid).map((order: any) => (
+                          <div key={order.id} className="card p-6 hover:shadow-xl transition-shadow">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                  <CheckCircle className="h-6 w-6 text-green-600" />
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-lg">Order #{order.id.toString().slice(-8)}</h3>
+                                  <p className="text-sm text-gray-600">
+                                    {new Date(order.created_at || order.createdAt).toLocaleDateString('en-NG', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold">
+                                Paid
+                              </span>
+                            </div>
+
+                            <div className="border-t border-gray-200 pt-4 mb-4">
+                              <div className="flex justify-between mb-2">
+                                <span className="text-gray-600">Amount Paid:</span>
+                                <span className="font-bold text-xl text-primary">
+                                  ₦{parseFloat(order.total_price || order.totalPrice || 0).toLocaleString()}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Payment Date:</span>
+                                <span className="font-medium">
+                                  {order.paid_at ? new Date(order.paid_at).toLocaleDateString('en-NG') : 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => handleViewReceipt(order)}
+                              className="btn-primary w-full flex items-center justify-center gap-2"
+                            >
+                              <ReceiptIcon className="h-4 w-4" />
+                              View Receipt
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500 mb-4">No payment receipts available</p>
+                        <p className="text-sm text-gray-400 mb-6">
+                          Receipts are generated after successful payment
+                        </p>
+                        <Link to="/shop" className="btn-primary">
+                          Start Shopping
+                        </Link>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -589,6 +678,17 @@ const UserDashboard = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Receipt Modal */}
+      {showReceipt && selectedReceipt && (
+        <Receipt
+          order={selectedReceipt}
+          onClose={() => {
+            setShowReceipt(false);
+            setSelectedReceipt(null);
+          }}
+        />
       )}
     </div>
   );
