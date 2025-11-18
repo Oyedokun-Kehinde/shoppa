@@ -1,27 +1,24 @@
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 
 let pool;
 
 const connectDB = async () => {
   try {
-    pool = mysql.createPool({
-      host: process.env.DB_HOST || '127.0.0.1',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'shoppa',
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      // Supabase hosted Postgres requires SSL
+      ssl: {
+        rejectUnauthorized: false,
+      },
     });
 
     // Test connection
-    const connection = await pool.getConnection();
-    console.log('MySQL Connected Successfully');
-    connection.release();
-    
+    await pool.query('SELECT 1');
+    console.log('PostgreSQL (Supabase) Connected Successfully');
+
     return pool;
   } catch (error) {
-    console.error(`MySQL Connection Error: ${error.message}`);
+    console.error(`PostgreSQL Connection Error: ${error.message}`);
     process.exit(1);
   }
 };

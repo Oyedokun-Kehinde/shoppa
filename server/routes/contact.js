@@ -27,7 +27,7 @@ router.post(
       // Save to database
       const pool = getPool();
       await pool.query(
-        'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+        'INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)',
         [name, email, subject, message]
       );
 

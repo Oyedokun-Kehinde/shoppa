@@ -291,7 +291,7 @@ const Checkout = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={processing || items.length === 0}
+                disabled={processing}
                 className="btn-primary w-full inline-flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {processing ? (

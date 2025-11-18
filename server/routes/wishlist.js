@@ -10,10 +10,10 @@ const router = express.Router();
 router.get('/', protect, async (req, res) => {
   try {
     const pool = getPool();
-    const [wishlist] = await pool.query(
+    const { rows: wishlist } = await pool.query(
       `SELECT w.*, p.* FROM wishlist w
        JOIN products p ON w.product_id = p.id
-       WHERE w.user_id = ?`,
+       WHERE w.user_id = $1`,
       [req.user.id]
     );
 
@@ -33,8 +33,8 @@ router.post('/', protect, async (req, res) => {
     const pool = getPool();
 
     // Check if already exists
-    const [existing] = await pool.query(
-      'SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?',
+    const { rows: existing } = await pool.query(
+      'SELECT * FROM wishlist WHERE user_id = $1 AND product_id = $2',
       [req.user.id, productId]
     );
 
@@ -43,7 +43,7 @@ router.post('/', protect, async (req, res) => {
     }
 
     await pool.query(
-      'INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)',
+      'INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2)',
       [req.user.id, productId]
     );
 
@@ -61,7 +61,7 @@ router.delete('/:productId', protect, async (req, res) => {
   try {
     const pool = getPool();
     await pool.query(
-      'DELETE FROM wishlist WHERE user_id = ? AND product_id = ?',
+      'DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2',
       [req.user.id, req.params.productId]
     );
 
@@ -78,7 +78,7 @@ router.delete('/:productId', protect, async (req, res) => {
 router.delete('/', protect, async (req, res) => {
   try {
     const pool = getPool();
-    await pool.query('DELETE FROM wishlist WHERE user_id = ?', [req.user.id]);
+    await pool.query('DELETE FROM wishlist WHERE user_id = $1', [req.user.id]);
 
     res.json({ message: 'Wishlist cleared' });
   } catch (error) {

@@ -25,7 +25,7 @@ router.post(
       const pool = getPool();
 
       await pool.query(
-        'INSERT INTO chat_inquiries (name, email, question) VALUES (?, ?, ?)',
+        'INSERT INTO chat_inquiries (name, email, question) VALUES ($1, $2, $3)',
         [name, email, question]
       );
 
@@ -43,7 +43,7 @@ router.post(
 router.get('/inquiries', async (req, res) => {
   try {
     const pool = getPool();
-    const [inquiries] = await pool.query(
+    const { rows: inquiries } = await pool.query(
       'SELECT * FROM chat_inquiries ORDER BY created_at DESC LIMIT 100'
     );
 

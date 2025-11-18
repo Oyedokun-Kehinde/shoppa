@@ -309,8 +309,8 @@ const Shop = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map((product: any) => (
-                <div key={product._id} className="card overflow-hidden group hover:shadow-xl transition-all duration-300">
-                  <Link to={`/product/${product._id}`} className="block relative h-64 overflow-hidden">
+                <div key={product.id} className="card overflow-hidden group hover:shadow-xl transition-all duration-300">
+                  <Link to={`/product/${product.slug}`} className="block relative h-64 overflow-hidden">
                     <img
                       src={product.image}
                       alt={product.name}

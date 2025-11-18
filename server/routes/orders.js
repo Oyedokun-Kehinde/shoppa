@@ -25,10 +25,10 @@ router.post('/', protect, async (req, res) => {
     }
 
     const pool = getPool();
-    const [result] = await pool.query(
+    const { rows: [result] } = await pool.query(
       `INSERT INTO orders (user_id, total_price, shipping_price, tax_price, 
        shipping_address_address, shipping_address_city, shipping_address_postal_code, 
-       shipping_address_country, payment_method) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       shipping_address_country, payment_method) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
       [
         req.user.id,
         totalPrice,
@@ -42,13 +42,13 @@ router.post('/', protect, async (req, res) => {
       ]
     );
 
-    const orderId = result.insertId;
+    const orderId = result.id;
 
     // Insert order items
     for (const item of orderItems) {
       await pool.query(
         `INSERT INTO order_items (order_id, product_id, name, quantity, image, price) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
+         VALUES ($1, $2, $3, $4, $5, $6)`,
         [orderId, item.product, item.name, item.quantity, item.image, item.price]
       );
     }
@@ -66,8 +66,8 @@ router.post('/', protect, async (req, res) => {
 router.get('/myorders', protect, async (req, res) => {
   try {
     const pool = getPool();
-    const [orders] = await pool.query(
-      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
+    const { rows: orders } = await pool.query(
+      'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
       [req.user.id]
     );
     res.json(orders);
@@ -85,8 +85,8 @@ router.get('/:id', protect, async (req, res) => {
     const pool = getPool();
     
     // Get order details
-    const [orders] = await pool.query(
-      'SELECT * FROM orders WHERE id = ? AND user_id = ?',
+    const { rows: orders } = await pool.query(
+      'SELECT * FROM orders WHERE id = $1 AND user_id = $2',
       [req.params.id, req.user.id]
     );
 
@@ -97,8 +97,8 @@ router.get('/:id', protect, async (req, res) => {
     const order = orders[0];
 
     // Get order items
-    const [items] = await pool.query(
-      'SELECT * FROM order_items WHERE order_id = ?',
+    const { rows: items } = await pool.query(
+      'SELECT * FROM order_items WHERE order_id = $1',
       [req.params.id]
     );
 
@@ -233,8 +233,8 @@ router.post('/paystack/verify', protect, async (req, res) => {
       console.log('🔍 Checking if order exists...');
       
       // Check if order exists and belongs to user
-      const [existingOrders] = await pool.query(
-        'SELECT * FROM orders WHERE id = ? AND user_id = ?',
+      const { rows: existingOrders } = await pool.query(
+        'SELECT * FROM orders WHERE id = $1 AND user_id = $2',
         [orderId, req.user.id]
       );
       
@@ -255,16 +255,15 @@ router.post('/paystack/verify', protect, async (req, res) => {
       console.log('📝 Converted Order ID:', orderIdNumber, 'Type:', typeof orderIdNumber);
       
       // Update order as paid
-      const [updateResult] = await pool.query(
-        `UPDATE orders SET is_paid = 1, paid_at = NOW(), payment_result = ? WHERE id = ?`,
+      const { rowCount: updateResult } = await pool.query(
+        `UPDATE orders SET is_paid = true, paid_at = NOW(), payment_result = $1 WHERE id = $2`,
         [JSON.stringify(data), orderIdNumber]
       );
 
       console.log('✅ Order update result:', updateResult);
-      console.log('✅ Affected rows:', updateResult.affectedRows);
-      console.log('✅ Changed rows:', updateResult.changedRows);
+      console.log('✅ Affected rows:', updateResult);
       
-      if (updateResult.affectedRows === 0) {
+      if (updateResult === 0) {
         console.error('⚠️ WARNING: No rows were updated! Order may not exist or is already paid.');
       } else {
         console.log('✅ Order', orderIdNumber, 'marked as PAID successfully');
@@ -321,8 +320,8 @@ router.patch('/:id/mark-paid', protect, async (req, res) => {
     console.log('🔧 Manually marking order as paid:', req.params.id);
     
     // Check if order exists and belongs to user
-    const [existingOrders] = await pool.query(
-      'SELECT * FROM orders WHERE id = ? AND user_id = ?',
+    const { rows: existingOrders } = await pool.query(
+      'SELECT * FROM orders WHERE id = $1 AND user_id = $2',
       [req.params.id, req.user.id]
     );
 
@@ -332,7 +331,7 @@ router.patch('/:id/mark-paid', protect, async (req, res) => {
 
     // Update order as paid
     await pool.query(
-      `UPDATE orders SET is_paid = 1, paid_at = NOW() WHERE id = ?`,
+      `UPDATE orders SET is_paid = true, paid_at = NOW() WHERE id = $1`,
       [req.params.id]
     );
 

@@ -1,0 +1,196 @@
+// This is your Prisma schema file for PostgreSQL (Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  orders          Order[]
+  productReviews  ProductReview[]
+  wishlistItems   Wishlist[]
+  blogComments    BlogComment[]
+  blogReactions   BlogReaction[]
+
+  @@map("users")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  category    String
+  image       String
+  stock       Int      @default(0)
+  rating      Decimal  @default(0) @db.Decimal(3, 2)
+  numReviews  Int      @default(0) @map("num_reviews")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  reviews       ProductReview[]
+  orderItems    OrderItem[]
+  wishlistItems Wishlist[]
+
+  @@map("products")
+}
+
+model ProductReview {
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
+  userId    Int      @map("user_id")
+  rating    Int
+  title     String
+  comment   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("product_reviews")
+}
+
+model Order {
+  id                          Int       @id @default(autoincrement())
+  userId                      Int       @map("user_id")
+  totalPrice                  Decimal   @map("total_price") @db.Decimal(10, 2)
+  shippingPrice               Decimal   @map("shipping_price") @db.Decimal(10, 2)
+  taxPrice                    Decimal   @map("tax_price") @db.Decimal(10, 2)
+  shippingAddressAddress      String    @map("shipping_address_address")
+  shippingAddressCity         String    @map("shipping_address_city")
+  shippingAddressPostalCode   String    @map("shipping_address_postal_code")
+  shippingAddressCountry      String    @map("shipping_address_country")
+  paymentMethod               String    @map("payment_method")
+  isPaid                      Boolean   @default(false) @map("is_paid")
+  paidAt                      DateTime? @map("paid_at")
+  paymentResult               String?   @map("payment_result") @db.Text
+  status                      String    @default("Pending")
+  createdAt                   DateTime  @default(now()) @map("created_at")
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int     @map("order_id")
+  productId Int     @map("product_id")
+  name      String
+  quantity  Int
+  image     String
+  price     Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Wishlist {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  productId Int      @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("wishlist")
+}
+
+model BlogPost {
+  id              Int      @id @default(autoincrement())
+  title           String
+  slug            String   @unique
+  excerpt         String?  @db.Text
+  content         String   @db.Text
+  category        String
+  author          String
+  featuredImage   String?  @map("featured_image")
+  published       Boolean  @default(false)
+  commentsCount   Int      @default(0) @map("comments_count")
+  likesCount      Int      @default(0) @map("likes_count")
+  lovesCount      Int      @default(0) @map("loves_count")
+  insightfulCount Int      @default(0) @map("insightful_count")
+  celebrateCount  Int      @default(0) @map("celebrate_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  comments  BlogComment[]
+  reactions BlogReaction[]
+
+  @@map("blog_posts")
+}
+
+model BlogComment {
+  id         Int      @id @default(autoincrement())
+  blogPostId Int      @map("blog_post_id")
+  userId     Int      @map("user_id")
+  comment    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  blogPost BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("blog_comments")
+}
+
+model BlogReaction {
+  id           Int      @id @default(autoincrement())
+  blogPostId   Int      @map("blog_post_id")
+  userId       Int?     @map("user_id")
+  sessionId    String?  @map("session_id")
+  reactionType String   @map("reaction_type")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  blogPost BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("blog_reactions")
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}
+
+model Newsletter {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  subscribed      Boolean   @default(true)
+  subscribedAt    DateTime  @default(now()) @map("subscribed_at")
+  unsubscribedAt  DateTime? @map("unsubscribed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@map("newsletter")
+}
+
+model ChatInquiry {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  question  String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("chat_inquiries")
+}

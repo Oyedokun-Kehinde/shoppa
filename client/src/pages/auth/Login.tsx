@@ -36,7 +36,18 @@ const Login = () => {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', error);
+      const status = error.response?.status;
+      const dataRes = error.response?.data;
+
+      const message =
+        dataRes?.message ||
+        dataRes?.error ||
+        (status === 401
+          ? 'Invalid email or password'
+          : 'Login failed. Please try again.');
+
+      toast.error(message);
     }
   };
 

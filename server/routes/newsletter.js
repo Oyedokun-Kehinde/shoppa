@@ -21,7 +21,7 @@ router.post(
       const pool = getPool();
 
       // Check if email already exists
-      const [existing] = await pool.query('SELECT * FROM newsletter WHERE email = ?', [email]);
+      const { rows: existing } = await pool.query('SELECT * FROM newsletter WHERE email = $1', [email]);
       
       if (existing.length > 0) {
         if (existing[0].subscribed) {
@@ -29,7 +29,7 @@ router.post(
         } else {
           // Resubscribe
           await pool.query(
-            'UPDATE newsletter SET subscribed = TRUE, subscribed_at = NOW(), unsubscribed_at = NULL WHERE email = ?',
+            'UPDATE newsletter SET subscribed = TRUE, subscribed_at = NOW(), unsubscribed_at = NULL WHERE email = $1',
             [email]
           );
           return res.json({ message: 'Successfully resubscribed to our newsletter!' });
@@ -37,7 +37,7 @@ router.post(
       }
 
       // Create new subscription
-      await pool.query('INSERT INTO newsletter (email) VALUES (?)', [email]);
+      await pool.query('INSERT INTO newsletter (email) VALUES ($1)', [email]);
 
       res.status(201).json({ message: 'Successfully subscribed to our newsletter!' });
     } catch (error) {
@@ -63,13 +63,13 @@ router.post(
       const { email } = req.body;
       const pool = getPool();
 
-      const [subscription] = await pool.query('SELECT * FROM newsletter WHERE email = ?', [email]);
+      const { rows: subscription } = await pool.query('SELECT * FROM newsletter WHERE email = $1', [email]);
       if (subscription.length === 0) {
         return res.status(404).json({ message: 'Email not found in our newsletter list' });
       }
 
       await pool.query(
-        'UPDATE newsletter SET subscribed = FALSE, unsubscribed_at = NOW() WHERE email = ?',
+        'UPDATE newsletter SET subscribed = FALSE, unsubscribed_at = NOW() WHERE email = $1',
         [email]
       );
 

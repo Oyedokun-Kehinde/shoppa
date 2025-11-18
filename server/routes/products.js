@@ -16,18 +16,18 @@ router.get('/', async (req, res) => {
     const params = [];
 
     if (category && category !== 'All') {
-      query += ' AND category = ?';
+      query += ' AND category = $' + (params.length + 1);
       params.push(category);
     }
 
     if (search) {
-      query += ' AND name LIKE ?';
+      query += ' AND name ILIKE $' + (params.length + 1);
       params.push(`%${search}%`);
     }
 
     query += ' ORDER BY created_at DESC';
 
-    const [products] = await pool.query(query, params);
+    const { rows: products } = await pool.query(query, params);
     res.json(products);
   } catch (error) {
     console.error('Get products error:', error);
@@ -41,8 +41,8 @@ router.get('/', async (req, res) => {
 router.get('/slug/:slug', async (req, res) => {
   try {
     const pool = getPool();
-    const [products] = await pool.query(
-      'SELECT * FROM products WHERE slug = ?',
+    const { rows: products } = await pool.query(
+      'SELECT * FROM products WHERE slug = $1',
       [req.params.slug]
     );
 
@@ -63,8 +63,8 @@ router.get('/slug/:slug', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const pool = getPool();
-    const [products] = await pool.query(
-      'SELECT * FROM products WHERE id = ?',
+    const { rows: products } = await pool.query(
+      'SELECT * FROM products WHERE id = $1',
       [req.params.id]
     );
 
@@ -85,11 +85,11 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/reviews', async (req, res) => {
   try {
     const pool = getPool();
-    const [reviews] = await pool.query(
+    const { rows: reviews } = await pool.query(
       `SELECT pr.*, u.name as user_name 
        FROM product_reviews pr 
        JOIN users u ON pr.user_id = u.id 
-       WHERE pr.product_id = ? 
+       WHERE pr.product_id = $1 
        ORDER BY pr.created_at DESC`,
       [req.params.id]
     );
@@ -110,8 +110,8 @@ router.post('/:id/reviews', protect, async (req, res) => {
     const pool = getPool();
 
     // Check if user already reviewed this product
-    const [existing] = await pool.query(
-      'SELECT id FROM product_reviews WHERE product_id = ? AND user_id = ?',
+    const { rows: existing } = await pool.query(
+      'SELECT id FROM product_reviews WHERE product_id = $1 AND user_id = $2',
       [req.params.id, req.user.id]
     );
 
@@ -121,18 +121,18 @@ router.post('/:id/reviews', protect, async (req, res) => {
 
     // Insert review
     await pool.query(
-      'INSERT INTO product_reviews (product_id, user_id, rating, title, comment) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO product_reviews (product_id, user_id, rating, title, comment) VALUES ($1, $2, $3, $4, $5)',
       [req.params.id, req.user.id, rating, title, comment]
     );
 
     // Update product rating
-    const [reviews] = await pool.query(
-      'SELECT AVG(rating) as avg_rating, COUNT(*) as count FROM product_reviews WHERE product_id = ?',
+    const { rows: reviews } = await pool.query(
+      'SELECT AVG(rating) as avg_rating, COUNT(*) as count FROM product_reviews WHERE product_id = $1',
       [req.params.id]
     );
 
     await pool.query(
-      'UPDATE products SET rating = ?, num_reviews = ? WHERE id = ?',
+      'UPDATE products SET rating = $1, num_reviews = $2 WHERE id = $3',
       [reviews[0].avg_rating, reviews[0].count, req.params.id]
     );
 
@@ -151,17 +151,15 @@ router.post('/', protect, admin, async (req, res) => {
     const { name, description, price, category, image, stock } = req.body;
     const pool = getPool();
 
-    const [result] = await pool.query(
-      'INSERT INTO products (name, description, price, category, image, stock) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, description, price, category, image, stock || 0]
+    // Generate slug from name
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    const { rows: [result] } = await pool.query(
+      'INSERT INTO products (name, slug, description, price, category, image, stock) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, slug, description, price, category, image, stock || 0]
     );
 
-    const [products] = await pool.query(
-      'SELECT * FROM products WHERE id = ?',
-      [result.insertId]
-    );
-
-    res.status(201).json(products[0]);
+    res.status(201).json(result);
   } catch (error) {
     console.error('Create product error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -176,19 +174,14 @@ router.put('/:id', protect, admin, async (req, res) => {
     const pool = getPool();
     const { name, description, price, category, image, stock } = req.body;
 
-    const [result] = await pool.query(
-      'UPDATE products SET name = ?, description = ?, price = ?, category = ?, image = ?, stock = ? WHERE id = ?',
+    const { rows: products } = await pool.query(
+      'UPDATE products SET name = $1, description = $2, price = $3, category = $4, image = $5, stock = $6 WHERE id = $7 RETURNING *',
       [name, description, price, category, image, stock, req.params.id]
     );
 
-    if (result.affectedRows === 0) {
+    if (products.length === 0) {
       return res.status(404).json({ message: 'Product not found' });
     }
-
-    const [products] = await pool.query(
-      'SELECT * FROM products WHERE id = ?',
-      [req.params.id]
-    );
 
     res.json(products[0]);
   } catch (error) {
@@ -204,12 +197,12 @@ router.delete('/:id', protect, admin, async (req, res) => {
   try {
     const pool = getPool();
     
-    const [result] = await pool.query(
-      'DELETE FROM products WHERE id = ?',
+    const { rowCount } = await pool.query(
+      'DELETE FROM products WHERE id = $1',
       [req.params.id]
     );
 
-    if (result.affectedRows === 0) {
+    if (rowCount === 0) {
       return res.status(404).json({ message: 'Product not found' });
     }
 

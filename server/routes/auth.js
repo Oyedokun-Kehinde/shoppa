@@ -28,7 +28,7 @@ router.post(
       const pool = getPool();
 
       // Check if user already exists
-      const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+      const { rows: existingUsers } = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
       if (existingUsers.length > 0) {
         return res.status(400).json({ message: 'User already exists' });
       }
@@ -38,12 +38,12 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, salt);
 
       // Create user
-      const [result] = await pool.query(
-        'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+      const { rows: [result] } = await pool.query(
+        'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id',
         [name, email, hashedPassword]
       );
 
-      const userId = result.insertId;
+      const userId = result.id;
 
       // Generate token
       const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -86,8 +86,8 @@ router.post(
       const pool = getPool();
 
       // Find user
-      const [users] = await pool.query(
-        'SELECT id, name, email, password, role FROM users WHERE email = ?',
+      const { rows: users } = await pool.query(
+        'SELECT id, name, email, password, role FROM users WHERE email = $1',
         [email]
       );
 
@@ -131,8 +131,8 @@ router.post(
 router.get('/me', protect, async (req, res) => {
   try {
     const pool = getPool();
-    const [users] = await pool.query(
-      'SELECT id, name, email, role FROM users WHERE id = ?',
+    const { rows: users } = await pool.query(
+      'SELECT id, name, email, role FROM users WHERE id = $1',
       [req.user.id]
     );
 

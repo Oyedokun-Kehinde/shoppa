@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/posts', async (req, res) => {
   try {
     const pool = getPool();
-    const [posts] = await pool.query(
+    const { rows: posts } = await pool.query(
       `SELECT id, title, slug, excerpt, content, category, author, featured_image, 
        published, created_at, updated_at 
        FROM blog_posts 
@@ -32,11 +32,11 @@ router.get('/posts', async (req, res) => {
 router.get('/posts/:slug', async (req, res) => {
   try {
     const pool = getPool();
-    const [posts] = await pool.query(
+    const { rows: posts } = await pool.query(
       `SELECT id, title, slug, excerpt, content, category, author, featured_image, 
        published, created_at, updated_at 
        FROM blog_posts 
-       WHERE slug = ? AND published = TRUE`,
+       WHERE slug = $1 AND published = TRUE`,
       [req.params.slug]
     );
 
@@ -79,18 +79,13 @@ router.post(
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
 
-      const [result] = await pool.query(
+      const { rows: [result] } = await pool.query(
         `INSERT INTO blog_posts (title, slug, excerpt, content, category, author, featured_image, published) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
         [title, slug, excerpt, content, category, author, featured_image, published || false]
       );
 
-      const [posts] = await pool.query(
-        'SELECT * FROM blog_posts WHERE id = ?',
-        [result.insertId]
-      );
-
-      res.status(201).json(posts[0]);
+      res.status(201).json(result);
     } catch (error) {
       console.error('Create blog post error:', error);
       res.status(500).json({ message: 'Server error', error: error.message });
@@ -104,11 +99,11 @@ router.post(
 router.get('/:id/comments', async (req, res) => {
   try {
     const pool = getPool();
-    const [comments] = await pool.query(
+    const { rows: comments } = await pool.query(
       `SELECT bc.*, u.name as user_name 
        FROM blog_comments bc 
        JOIN users u ON bc.user_id = u.id 
-       WHERE bc.blog_post_id = ? 
+       WHERE bc.blog_post_id = $1 
        ORDER BY bc.created_at DESC`,
       [req.params.id]
     );
@@ -133,16 +128,16 @@ router.post('/:id/comments', protect, async (req, res) => {
     const pool = getPool();
 
     await pool.query(
-      'INSERT INTO blog_comments (blog_post_id, user_id, comment) VALUES (?, ?, ?)',
+      'INSERT INTO blog_comments (blog_post_id, user_id, comment) VALUES ($1, $2, $3)',
       [req.params.id, req.user.id, comment]
     );
 
     // Update comments count
     await pool.query(
       `UPDATE blog_posts 
-       SET comments_count = (SELECT COUNT(*) FROM blog_comments WHERE blog_post_id = ?) 
-       WHERE id = ?`,
-      [req.params.id, req.params.id]
+       SET comments_count = (SELECT COUNT(*) FROM blog_comments WHERE blog_post_id = $1) 
+       WHERE id = $1`,
+      [req.params.id]
     );
 
     res.status(201).json({ message: 'Comment added successfully' });
@@ -170,15 +165,17 @@ router.post('/:id/reaction', optionalAuth, async (req, res) => {
     // Check if user/session already reacted
     let existingReaction;
     if (userId) {
-      [existingReaction] = await pool.query(
-        'SELECT * FROM blog_reactions WHERE blog_post_id = ? AND user_id = ?',
+      const { rows } = await pool.query(
+        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND user_id = $2',
         [req.params.id, userId]
       );
+      existingReaction = rows;
     } else if (session_id) {
-      [existingReaction] = await pool.query(
-        'SELECT * FROM blog_reactions WHERE blog_post_id = ? AND session_id = ?',
+      const { rows } = await pool.query(
+        'SELECT * FROM blog_reactions WHERE blog_post_id = $1 AND session_id = $2',
         [req.params.id, session_id]
       );
+      existingReaction = rows;
     } else {
       return res.status(400).json({ message: 'User ID or session ID required' });
     }
@@ -186,32 +183,32 @@ router.post('/:id/reaction', optionalAuth, async (req, res) => {
     if (existingReaction.length > 0) {
       // Update existing reaction
       await pool.query(
-        'UPDATE blog_reactions SET reaction_type = ? WHERE id = ?',
+        'UPDATE blog_reactions SET reaction_type = $1 WHERE id = $2',
         [reaction_type, existingReaction[0].id]
       );
     } else {
       // Insert new reaction
       await pool.query(
-        'INSERT INTO blog_reactions (blog_post_id, user_id, session_id, reaction_type) VALUES (?, ?, ?, ?)',
+        'INSERT INTO blog_reactions (blog_post_id, user_id, session_id, reaction_type) VALUES ($1, $2, $3, $4)',
         [req.params.id, userId, session_id, reaction_type]
       );
     }
 
     // Update reaction counts
-    const [reactions] = await pool.query(
+    const { rows: reactions } = await pool.query(
       `SELECT 
         SUM(CASE WHEN reaction_type = 'like' THEN 1 ELSE 0 END) as likes,
         SUM(CASE WHEN reaction_type = 'love' THEN 1 ELSE 0 END) as loves,
         SUM(CASE WHEN reaction_type = 'insightful' THEN 1 ELSE 0 END) as insightful,
         SUM(CASE WHEN reaction_type = 'celebrate' THEN 1 ELSE 0 END) as celebrate
-       FROM blog_reactions WHERE blog_post_id = ?`,
+       FROM blog_reactions WHERE blog_post_id = $1`,
       [req.params.id]
     );
 
     await pool.query(
       `UPDATE blog_posts 
-       SET likes_count = ?, loves_count = ?, insightful_count = ?, celebrate_count = ? 
-       WHERE id = ?`,
+       SET likes_count = $1, loves_count = $2, insightful_count = $3, celebrate_count = $4 
+       WHERE id = $5`,
       [reactions[0].likes, reactions[0].loves, reactions[0].insightful, reactions[0].celebrate, req.params.id]
     );
 
@@ -246,15 +243,17 @@ router.get('/:id/reaction', optionalAuth, async (req, res) => {
 
     let reactions;
     if (userId) {
-      [reactions] = await pool.query(
-        'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = ? AND user_id = ?',
+      const { rows } = await pool.query(
+        'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = $1 AND user_id = $2',
         [req.params.id, userId]
       );
+      reactions = rows;
     } else {
-      [reactions] = await pool.query(
-        'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = ? AND session_id = ?',
+      const { rows } = await pool.query(
+        'SELECT reaction_type FROM blog_reactions WHERE blog_post_id = $1 AND session_id = $2',
         [req.params.id, session_id]
       );
+      reactions = rows;
     }
 
     if (reactions.length > 0) {
