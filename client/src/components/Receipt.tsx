@@ -27,7 +27,7 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
                 body { font-family: Arial, sans-serif; padding: 20px; }
                 .receipt-container { max-width: 800px; margin: 0 auto; }
                 .header { text-align: center; margin-bottom: 30px; }
-                .logo { font-size: 28px; font-weight: bold; color: #4F46E5; }
+                .logo { font-size: 28px; font-weight: bold; color: #DC2626; }
                 .divider { border-bottom: 2px solid #e5e7eb; margin: 20px 0; }
                 .section { margin: 20px 0; }
                 .section-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
@@ -83,35 +83,41 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto"
+      onClick={(e) => {
+        // Close when clicking outside the modal
+        if (e.target === e.currentTarget) {
+          onClose?.();
+        }
+      }}
+    >
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full my-8">
         {/* Header Actions */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-xl no-print">
+        <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 rounded-t-xl no-print">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-white">Payment Receipt</h2>
             <div className="flex gap-2">
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-red-50 transition-colors"
               >
                 <Download className="h-4 w-4" />
                 Download
               </button>
               <button
                 onClick={handlePrint}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-red-50 transition-colors"
               >
                 <Printer className="h-4 w-4" />
                 Print
               </button>
-              {onClose && (
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors"
-                >
-                  Close
-                </button>
-              )}
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors"
+              >
+                ✕ Close
+              </button>
             </div>
           </div>
         </div>
@@ -120,7 +126,7 @@ const Receipt = ({ order, onClose }: ReceiptProps) => {
         <div ref={receiptRef} className="p-8 receipt-container">
           {/* Company Header */}
           <div className="header text-center mb-8">
-            <div className="logo text-4xl font-bold text-indigo-600 mb-2">Shoppa</div>
+            <div className="logo text-4xl font-bold text-red-600 mb-2">Shoppa</div>
             <p className="text-gray-600">Your Trusted Online Shopping Partner</p>
             <p className="text-sm text-gray-500 mt-2">
               📧 support@shoppa.com | 📞 +234-XXX-XXX-XXXX

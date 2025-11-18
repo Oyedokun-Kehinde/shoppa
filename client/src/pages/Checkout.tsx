@@ -29,8 +29,14 @@ const Checkout = () => {
   }, [isAuthenticated, navigate]);
 
   const total = getTotalPrice();
-  const shippingPrice = total > 50000 ? 0 : 2000; // Free shipping over ₦50,000, else ₦2,000
-  const taxPrice = total * 0.08;
+  // Shipping: 5% of cart value, min ₦3,000, max ₦10,000, free over ₦200,000
+  const calculateShipping = () => {
+    if (total >= 200000) return 0; // Free shipping
+    const percentage = total * 0.05;
+    return Math.min(Math.max(percentage, 3000), 10000); // Between ₦3,000 and ₦10,000
+  };
+  const shippingPrice = calculateShipping();
+  const taxPrice = total * 0.075; // 7.5% VAT (Nigerian standard)
   const totalPrice = total + shippingPrice + taxPrice;
 
   const onSubmit = async (data: any) => {
@@ -344,7 +350,7 @@ const Checkout = () => {
                   <span>{shippingPrice === 0 ? 'FREE' : `₦${shippingPrice.toLocaleString()}`}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Tax (8%)</span>
+                  <span>Tax (7.5% VAT)</span>
                   <span>₦{taxPrice.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold text-dark pt-3 border-t border-gray-200">
@@ -355,7 +361,14 @@ const Checkout = () => {
 
               {shippingPrice === 0 && (
                 <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-800 font-semibold">🎉 Free shipping applied!</p>
+                  <p className="text-sm text-green-800 font-semibold">🎉 Free shipping on orders over ₦200,000!</p>
+                </div>
+              )}
+              {total < 200000 && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-blue-800">
+                    💡 Spend ₦{(200000 - total).toLocaleString()} more for free shipping!
+                  </p>
                 </div>
               )}
             </div>
